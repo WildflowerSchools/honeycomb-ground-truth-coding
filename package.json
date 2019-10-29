@@ -1,0 +1,26 @@
+{
+  "name": "sensor-segments",
+  "version": "0.1.0",
+  "description": "groundtruth coding application",
+  "private": "true",
+  "dependencies": {
+    "aws-sdk": "^2.558.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WildflowerSchools/sensor-segments.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WildflowerSchools/sensor-segments/issues"
+  },
+  "homepage": "https://github.com/WildflowerSchools/sensor-segments#readme"
+}
