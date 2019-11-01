@@ -1,26 +1,40 @@
 {
-  "name": "sensor-segments",
+  "name": "wf-honeycomb-ground-truth-coding",
   "version": "0.1.0",
-  "description": "groundtruth coding application",
+  "description": "ground truth coding application",
   "private": "true",
   "dependencies": {
-    "aws-sdk": "^2.558.0"
+    "auth0-lock": "^11.18.1",
+    "aws-sdk": "^2.558.0",
+    "domready": "^1.0.8",
+    "react": "^16.11.0",
+    "react-bootstrap": "^1.0.0-beta.14",
+    "react-dom": "^16.11.0"
   },
   "devDependencies": {
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "dotenv": "^8.1.0",
+    "error-overlay-webpack-plugin": "^0.4.1",
+    "terser-webpack-plugin": "^1.4.1",
+    "to-string-loader": "^1.1.5",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run clean && webpack-dev-server --mode development",
+    "build": "npm run clean && webpack --mode production",
+    "clean": "rm -rf build/*",
+    "test": "echo 'tsk tsk... you should be testing'"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WildflowerSchools/sensor-segments.git"
   },
   "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/WildflowerSchools/sensor-segments/issues"
-  },
-  "homepage": "https://github.com/WildflowerSchools/sensor-segments#readme"
+  "license": "MIT"
 }
