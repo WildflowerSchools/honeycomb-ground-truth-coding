@@ -42,6 +42,7 @@ module.exports = (env, options) => {
         test: /\.css$/i,
         use: [
           'to-string-loader',
+          'style-loader',
           'css-loader'
         ]
       }]
