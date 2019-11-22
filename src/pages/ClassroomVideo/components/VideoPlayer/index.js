@@ -9,9 +9,13 @@ import {
 } from "react-bootstrap"
 import DatePicker from "react-datepicker"
 import { subDays } from "date-fns"
+import ReactHLS from 'react-hls-player';
 
 function Index(props) {
   const [startDate, setStartDate] = useState(subDays(new Date(), 1))
+  const [videoElement, setVideoElement] = useState()
+  const [videoHeight, setVideoHeight] = useState()
+  const [videoWidth, setVideoWidth] = useState()
 
   return (
     <Container>
@@ -39,17 +43,14 @@ function Index(props) {
       </Row>
       <Row>
         <Col lg>
-          <ResponsiveEmbed aspectRatio="16by9">
-            <iframe
-              width="420"
-              height="315"
-              src="https://www.youtube.com/embed/2yqz9zgoC-U"
-              allowFullScreen
-            />
+          <ResponsiveEmbed aspectRatio="4by3">
+            <ReactHLS hlsConfig={{xhrSetup: function(xhr, url) {
+              xhr.withCredentials = true; // send cookies
+            }}} controls={true} url={`${process.env.VIDEO_STREAM_URL}/capucine-001/cc-1/output.m3u8`}/>
           </ResponsiveEmbed>
         </Col>
       </Row>
-      <Row style={{ marginTop: "2 0px" }}>
+      <Row style={{ marginTop: "20px" }}>
         {[...Array(8)].map((_, ii) => {
           return (
             <Col xs={4} md={3} key={ii} style={{ paddingTop: "10px" }}>
@@ -57,7 +58,7 @@ function Index(props) {
                 <iframe
                   width="420"
                   height="315"
-                  src="https://www.youtube.com/embed/2yqz9zgoC-U"
+                  src=""
                   allowFullScreen
                 />
               </ResponsiveEmbed>

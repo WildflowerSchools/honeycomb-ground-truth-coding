@@ -21,6 +21,7 @@ module.exports = (env, options) => {
       host: '0.0.0.0',
       port: 3000,
       open: true,
+      https: true,
       historyApiFallback: true,
       contentBase: path.resolve(__dirname, 'public')
     },
@@ -50,6 +51,7 @@ module.exports = (env, options) => {
     plugins: [
       new DefinePlugin({
         'process.env.GRAPHQL_URL': JSON.stringify(process.env.GRAPHQL_URL),
+        'process.env.VIDEO_STREAM_URL': JSON.stringify(process.env.VIDEO_STREAM_URL),
         'process.env.AUTH0_CLIENT': JSON.stringify(process.env.AUTH0_CLIENT),
         'process.env.AUTH0_DOMAIN': JSON.stringify(process.env.AUTH0_DOMAIN),
         'process.env.AUTH0_CALLBACK': JSON.stringify(process.env.AUTH0_CALLBACK),
