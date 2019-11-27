@@ -56,7 +56,9 @@ function Index(props) {
                   }
                 }}
                 controls={true}
-                url={`${process.env.VIDEO_STREAM_URL}/capucine-001/cc-1/output.m3u8`}
+                url={`${
+                  process.env.VIDEO_STREAM_URL
+                }/capucine-001/cc-1/output.m3u8`}
               />
             </ResponsiveEmbed>
           )}

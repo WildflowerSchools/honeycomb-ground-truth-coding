@@ -11,14 +11,17 @@ function Index(props) {
 
   const { isAuthenticated, loginWithRedirect, loading } = useAuth0()
 
-  useEffect(() => {
-    const fn = async () => {
-      if (loading === false && !isAuthenticated) {
-        await loginWithRedirect({})
+  useEffect(
+    () => {
+      const fn = async () => {
+        if (loading === false && !isAuthenticated) {
+          await loginWithRedirect({})
+        }
       }
-    }
-    fn()
-  }, [isAuthenticated, loginWithRedirect, loading])
+      fn()
+    },
+    [isAuthenticated, loginWithRedirect, loading]
+  )
 
   return (
     <div ref={ref} className="wfs-app">

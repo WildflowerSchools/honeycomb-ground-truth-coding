@@ -3,6 +3,8 @@ const package = require('./package.json');
 const DefinePlugin = require('webpack').DefinePlugin;
 const TerserPlugin = require('terser-webpack-plugin');
 const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 require('dotenv').config();
 
@@ -12,13 +14,15 @@ module.exports = (env, options) => {
   const version = package.version.substring(0, package.version.lastIndexOf('.'));
 
   return {
-    entry: './src/index.js',
+    entry: {
+      app: './src/index.js'
+    },
     output: {
       path: path.resolve(__dirname, 'build'),
-      filename: () => build ? `build.${version}.js` : 'bundle.js'
+      filename: () => build ? `build.${version}.[contenthash].js` : 'bundle.js'
     },
     devServer: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: 3000,
       open: true,
       https: true,
@@ -31,13 +35,7 @@ module.exports = (env, options) => {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              '@babel/preset-react'
-            ]
-          }
+          loader: 'babel-loader'
         },
       }, {
         test: /\.css$/i,
@@ -57,7 +55,15 @@ module.exports = (env, options) => {
         'process.env.AUTH0_CALLBACK': JSON.stringify(process.env.AUTH0_CALLBACK),
         'process.env.AUTH0_AUDIENCE': JSON.stringify(process.env.AUTH0_AUDIENCE)
       }),
-      new ErrorOverlayPlugin()
+      new ErrorOverlayPlugin(),
+      new HtmlWebpackPlugin({
+        template: './public/index.html',
+        inject: false
+      }),
+      ...(build ?
+        [new CopyWebpackPlugin([
+          {from: './public/assets', to: 'assets' }
+        ])] : [])
     ],
     optimization: {
       minimizer: [
