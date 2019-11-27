@@ -9,13 +9,16 @@ import {
 } from "react-bootstrap"
 import DatePicker from "react-datepicker"
 import { subDays } from "date-fns"
-import ReactHLS from 'react-hls-player';
+import ReactHLS from "react-hls-player"
+import { useAuth0 } from "../../../../react-auth0-spa"
 
 function Index(props) {
   const [startDate, setStartDate] = useState(subDays(new Date(), 1))
   const [videoElement, setVideoElement] = useState()
   const [videoHeight, setVideoHeight] = useState()
   const [videoWidth, setVideoWidth] = useState()
+
+  const { loading, token } = useAuth0()
 
   return (
     <Container>
@@ -43,11 +46,20 @@ function Index(props) {
       </Row>
       <Row>
         <Col lg>
-          <ResponsiveEmbed aspectRatio="4by3">
-            <ReactHLS hlsConfig={{xhrSetup: function(xhr, url) {
-              xhr.withCredentials = true; // send cookies
-            }}} controls={true} url={`${process.env.VIDEO_STREAM_URL}/capucine-001/cc-1/output.m3u8`}/>
-          </ResponsiveEmbed>
+          {!loading && (
+            <ResponsiveEmbed aspectRatio="4by3">
+              <ReactHLS
+                hlsConfig={{
+                  xhrSetup: function(xhr, url) {
+                    //xhr.withCredentials = true; // send cookies
+                    xhr.setRequestHeader("Authorization", `Bearer ${token}`)
+                  }
+                }}
+                controls={true}
+                url={`${process.env.VIDEO_STREAM_URL}/capucine-001/cc-1/output.m3u8`}
+              />
+            </ResponsiveEmbed>
+          )}
         </Col>
       </Row>
       <Row style={{ marginTop: "20px" }}>
@@ -55,12 +67,7 @@ function Index(props) {
           return (
             <Col xs={4} md={3} key={ii} style={{ paddingTop: "10px" }}>
               <ResponsiveEmbed aspectRatio="16by9">
-                <iframe
-                  width="420"
-                  height="315"
-                  src=""
-                  allowFullScreen
-                />
+                <iframe width="420" height="315" src="" allowFullScreen />
               </ResponsiveEmbed>
             </Col>
           )

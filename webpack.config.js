@@ -18,7 +18,7 @@ module.exports = (env, options) => {
       filename: () => build ? `build.${version}.js` : 'bundle.js'
     },
     devServer: {
-      host: '0.0.0.0',
+      host: 'localhost',
       port: 3000,
       open: true,
       https: true,

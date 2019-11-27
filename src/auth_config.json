@@ -1,0 +1,8 @@
+{
+  "domain": "wildflowerschools.auth0.com",
+  "clientId": "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
+  "responseType": "token id_token",
+  "audience": "groundtruth",
+  "redirectUri": "http://localhost:3000",
+  "scope": "openid profile video:view"
+}
