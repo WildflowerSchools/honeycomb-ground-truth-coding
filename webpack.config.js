@@ -57,12 +57,13 @@ module.exports = (env, options) => {
       }),
       new ErrorOverlayPlugin(),
       new HtmlWebpackPlugin({
-        template: './public/index.html',
-        inject: false
+        template: path.join(__dirname, 'public', 'index.html'),
+        inject: false,
+        filename: path.join(__dirname, 'build', 'index.html'),
       }),
       ...(build ?
         [new CopyWebpackPlugin([
-          {from: './public/assets', to: 'assets' }
+          {from: path.join(__dirname, 'public', 'assets'), to: 'assets' }
         ])] : [])
     ],
     optimization: {
