@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Container,
   Col,
@@ -7,18 +7,75 @@ import {
   ResponsiveEmbed,
   Row
 } from "react-bootstrap"
+import axios from "axios"
 import DatePicker from "react-datepicker"
 import { subDays } from "date-fns"
 import ReactHLS from "react-hls-player"
 import { useAuth0 } from "../../../../react-auth0-spa"
 
+function HLSStream(props) {
+  const { streamURL, token } = props
+
+  const ready = streamURL !== undefined
+
+  return (
+    <ResponsiveEmbed aspectRatio="4by3">
+      {ready ? (
+        <ReactHLS
+          hlsConfig={{
+            xhrSetup: function(xhr, url) {
+              xhr.setRequestHeader("Authorization", `Bearer ${token}`)
+            }
+          }}
+          controls={true}
+          url={streamURL}
+        />
+      ) : (
+        <div />
+      )}
+    </ResponsiveEmbed>
+  )
+}
+
 function Index(props) {
   const [startDate, setStartDate] = useState(subDays(new Date(), 1))
-  const [videoElement, setVideoElement] = useState()
-  const [videoHeight, setVideoHeight] = useState()
-  const [videoWidth, setVideoWidth] = useState()
+  const [activeVideo, setActiveVideo] = useState()
+  const [videos, setVideos] = useState([])
+  const [startTime, setStartTime] = useState()
+  const [endTime, setEndTime] = useState()
 
-  const { loading, token } = useAuth0()
+  const { isAuthenticated, loading, token } = useAuth0()
+
+  useEffect(() => {
+    const fn = async () => {
+      if (loading === false && isAuthenticated) {
+        const result = await axios(
+          `${process.env.VIDEO_STREAM_URL}?classroom=capucine&date=2019-11-06`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        )
+
+        setVideos(result.data["videos"])
+
+        if (result.data["videos"].length > 0) {
+          setActiveVideo(result.data["videos"][0].url)
+        }
+
+        setStartTime(result.data["start"])
+        setEndTime(result.data["end"])
+      }
+    }
+    fn()
+  }, [
+    isAuthenticated,
+    loading,
+    token,
+    setVideos,
+    setActiveVideo,
+    setStartTime,
+    setEndTime
+  ])
 
   return (
     <Container>
@@ -46,35 +103,20 @@ function Index(props) {
       </Row>
       <Row>
         <Col lg>
-          {!loading && (
-            <ResponsiveEmbed aspectRatio="4by3">
-              <ReactHLS
-                hlsConfig={{
-                  xhrSetup: function(xhr, url) {
-                    //xhr.withCredentials = true; // send cookies
-                    xhr.setRequestHeader("Authorization", `Bearer ${token}`)
-                  }
-                }}
-                controls={true}
-                url={`${
-                  process.env.VIDEO_STREAM_URL
-                }/capucine-001/cc-1/output.m3u8`}
-              />
-            </ResponsiveEmbed>
-          )}
+          {!loading && <HLSStream streamURL={activeVideo} token={token} />}
         </Col>
       </Row>
-      <Row style={{ marginTop: "20px" }}>
-        {[...Array(8)].map((_, ii) => {
-          return (
-            <Col xs={4} md={3} key={ii} style={{ paddingTop: "10px" }}>
-              <ResponsiveEmbed aspectRatio="16by9">
-                <iframe width="420" height="315" src="" allowFullScreen />
-              </ResponsiveEmbed>
-            </Col>
-          )
-        })}
-      </Row>
+      {!loading && (
+        <Row style={{ marginTop: "20px" }}>
+          {videos.map((video, ii) => {
+            return (
+              <Col xs={4} md={3} key={ii} style={{ paddingTop: "10px" }}>
+                <HLSStream streamURL={video.url} token={token} />
+              </Col>
+            )
+          })}
+        </Row>
+      )}
     </Container>
   )
 }

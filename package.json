@@ -2,7 +2,7 @@
   "name": "wf-honeycomb-ground-truth-coding",
   "version": "0.1.0",
   "description": "ground truth coding application",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
@@ -10,6 +10,7 @@
     "@fortawesome/react-fontawesome": "^0.1.7",
     "auth0-lock": "^11.18.1",
     "aws-sdk": "^2.558.0",
+    "axios": "^0.19.0",
     "date-fns": "^2.7.0",
     "domready": "^1.0.8",
     "hls.js": "^0.12.4",
