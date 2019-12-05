@@ -4,8 +4,10 @@ import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
 import { Auth0Provider } from "./react-auth0-spa"
+//import { ApolloProvider } from "@apollo/react-hooks"
 import config from "./auth_config.json"
 import history from "./utils/history"
+import { HoneycombProvider } from "./clients/Honeycomb"
 
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -29,7 +31,9 @@ ReactDOM.render(
     scope={config.scope}
     onRedirectCallback={onRedirectCallback}
   >
-    <App />
+    <HoneycombProvider>
+      <App />
+    </HoneycombProvider>
   </Auth0Provider>,
   document.getElementById("root")
 )

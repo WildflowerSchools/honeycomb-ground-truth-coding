@@ -7,9 +7,8 @@ import ClassroomVideo from "./pages/ClassroomVideo"
 import { Container, Row } from "react-bootstrap"
 
 function Index(props) {
-  const ref = useRef()
-
   const { isAuthenticated, loginWithRedirect, loading } = useAuth0()
+  const ref = useRef()
 
   useEffect(() => {
     const fn = async () => {

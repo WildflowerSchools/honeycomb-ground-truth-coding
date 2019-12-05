@@ -14,9 +14,24 @@ import ReactHLS from "react-hls-player"
 import { useAuth0 } from "../../../../react-auth0-spa"
 
 function HLSStream(props) {
-  const { streamURL, token } = props
+  const { streamURL } = props
 
-  const ready = streamURL !== undefined
+  const [accessToken, setAccessToken] = useState("")
+  const { getTokenSilently } = useAuth0()
+
+  const ready = streamURL !== undefined && accessToken !== ""
+
+  useEffect(() => {
+    const getAccessToken = async () => {
+      try {
+        const token = await getTokenSilently()
+        setAccessToken(token)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    getAccessToken()
+  }, [getTokenSilently, setAccessToken])
 
   return (
     <ResponsiveEmbed aspectRatio="4by3">
@@ -24,7 +39,7 @@ function HLSStream(props) {
         <ReactHLS
           hlsConfig={{
             xhrSetup: function(xhr, url) {
-              xhr.setRequestHeader("Authorization", `Bearer ${token}`)
+              xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
             }
           }}
           controls={true}
@@ -44,11 +59,13 @@ function Index(props) {
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
 
-  const { isAuthenticated, loading, token } = useAuth0()
+  const { isAuthenticated, loading, getTokenSilently } = useAuth0()
 
   useEffect(() => {
     const fn = async () => {
       if (loading === false && isAuthenticated) {
+        const token = await getTokenSilently()
+
         const result = await axios(
           `${process.env.VIDEO_STREAM_URL}?classroom=capucine&date=2019-11-06`,
           {
@@ -69,8 +86,8 @@ function Index(props) {
     fn()
   }, [
     isAuthenticated,
+    getTokenSilently,
     loading,
-    token,
     setVideos,
     setActiveVideo,
     setStartTime,
@@ -102,16 +119,14 @@ function Index(props) {
         </Col>
       </Row>
       <Row>
-        <Col lg>
-          {!loading && <HLSStream streamURL={activeVideo} token={token} />}
-        </Col>
+        <Col lg>{!loading && <HLSStream streamURL={activeVideo} />}</Col>
       </Row>
       {!loading && (
         <Row style={{ marginTop: "20px" }}>
           {videos.map((video, ii) => {
             return (
               <Col xs={4} md={3} key={ii} style={{ paddingTop: "10px" }}>
-                <HLSStream streamURL={video.url} token={token} />
+                <HLSStream streamURL={video.url} />
               </Col>
             )
           })}

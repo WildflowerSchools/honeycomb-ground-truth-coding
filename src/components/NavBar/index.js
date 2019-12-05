@@ -1,9 +1,16 @@
 import React from "react"
 import { Navbar, Nav, Button, DropdownButton, Dropdown } from "react-bootstrap"
+import { useQuery } from "@apollo/react-hooks"
 
+import { GET_ENVIRONMENTS } from "../../clients/Honeycomb/queries"
 import { useAuth0 } from "../../react-auth0-spa"
 
 function Index(props) {
+  const {
+    loading: environmentsLoading,
+    error: environmentsError,
+    data: environmentsData
+  } = useQuery(GET_ENVIRONMENTS)
   const { isAuthenticated, loginWithRedirect, logout } = useAuth0()
 
   const logoutWithRedirect = () =>
@@ -32,15 +39,20 @@ function Index(props) {
         )}
         {isAuthenticated && (
           <Nav>
-            <DropdownButton
-              title="Classroom"
-              size="lg"
-              aria-label="Classroom Select"
-            >
-              <Dropdown.Item>Capucine</Dropdown.Item>
-              <Dropdown.Item>Acorn</Dropdown.Item>
-              <Dropdown.Item>Greenbrier</Dropdown.Item>
-            </DropdownButton>
+            {environmentsLoading && <div>Loading...</div>}
+            {!environmentsLoading && !environmentsError && environmentsData && (
+              <DropdownButton
+                title="Classroom"
+                size="lg"
+                aria-label="Classroom Select"
+              >
+                {environmentsData.environments.data.map(environment => (
+                  <Dropdown.Item key={environment.environment_id}>
+                    {environment.name}
+                  </Dropdown.Item>
+                ))}
+              </DropdownButton>
+            )}
             <Nav.Link
               id="qsLogoutBtn"
               href="#logout"
