@@ -5,6 +5,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const fs = require('fs')
 
 require('dotenv').config();
 
@@ -13,20 +14,30 @@ module.exports = (env, options) => {
   const build = options.mode === 'production';
   const version = package.version.substring(0, package.version.lastIndexOf('.'));
 
+  let https = true
+  if (process.env.HTTPS_KEY) {
+    https = {
+      key: fs.readFileSync(process.env.HTTPS_KEY),
+      cert: fs.readFileSync(process.env.HTTPS_CERT)
+    }
+  }
   return {
     entry: {
       app: './src/index.js'
     },
     output: {
       path: path.resolve(__dirname, 'build'),
+      publicPath: '/',
       filename: () => build ? `build.${version}.[contenthash].js` : 'bundle.js'
     },
     devServer: {
-      host: '0.0.0.0',
+      host: 'localhost',
       port: 3000,
       open: true,
-      https: true,
-      historyApiFallback: true,
+      https: https,
+      historyApiFallback: {
+        index: '/'
+      },
       contentBase: path.resolve(__dirname, 'public')
     },
     devtool: build ? false : 'cheap-module-source-map',

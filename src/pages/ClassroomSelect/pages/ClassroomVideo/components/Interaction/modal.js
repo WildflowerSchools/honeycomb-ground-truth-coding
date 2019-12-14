@@ -8,7 +8,7 @@ function Index(props) {
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Engagement</Modal.Title>
+        <Modal.Title>Add Interaction</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form />

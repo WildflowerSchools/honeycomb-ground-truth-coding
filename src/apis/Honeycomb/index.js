@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 
 import { ApolloProvider } from "@apollo/react-hooks"
 import { ApolloClient } from "apollo-client"
@@ -13,29 +13,18 @@ import { useAuth0 } from "../../react-auth0-spa"
 const HONEYCOMB_BASE_URL = process.env.GRAPHQL_URL
 
 export const HoneycombProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState("")
   const { getTokenSilently, loading } = useAuth0()
 
   if (loading) {
     return "Loading..."
   }
 
-  const getAccessToken = async () => {
-    try {
-      const token = await getTokenSilently()
-      setAccessToken(token)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-  getAccessToken()
-
   const httpLink = new HttpLink({
     uri: HONEYCOMB_BASE_URL
   })
 
-  const authLink = setContext((_, { headers }) => {
-    const token = accessToken
+  const authLink = setContext(async (_, { headers }) => {
+    const token = await getTokenSilently()
     if (token) {
       return {
         headers: {

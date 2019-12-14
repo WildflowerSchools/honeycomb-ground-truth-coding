@@ -1,9 +1,11 @@
 import React, { useRef, useEffect } from "react"
-
+import { Switch } from "react-router-dom"
+import PrivateRoute from "./components/PrivateRoute"
 import { useAuth0 } from "./react-auth0-spa"
 
 import NavBar from "./components/NavBar"
-import ClassroomVideo from "./pages/ClassroomVideo"
+import ClassroomSelect from "./pages/ClassroomSelect"
+import ClassroomVideo from "./pages/ClassroomSelect/pages/ClassroomVideo"
 import { Container, Row } from "react-bootstrap"
 
 function Index(props) {
@@ -21,15 +23,31 @@ function Index(props) {
 
   return (
     <div ref={ref} className="wfs-app">
-      <NavBar />
-      <Container style={{ marginTop: "50px" }}>
-        {isAuthenticated && <ClassroomVideo />}
-        {!isAuthenticated && (
+      {!isAuthenticated && (
+        <Container style={{ marginTop: "50px" }}>
           <Row className="justify-content-md-center">
             <div>Loading...</div>
           </Row>
-        )}
-      </Container>
+        </Container>
+      )}
+      {isAuthenticated && (
+        <div>
+          <NavBar />
+          <Container style={{ marginTop: "50px" }}>
+            <Switch>
+              <PrivateRoute
+                path="/classrooms/:classroomId/:videoDate"
+                component={ClassroomVideo}
+              />
+              <PrivateRoute
+                path="/classrooms/:classroomId"
+                component={ClassroomSelect}
+              />
+              <PrivateRoute path="*" component={ClassroomSelect} />
+            </Switch>
+          </Container>
+        </div>
+      )}
     </div>
   )
 }

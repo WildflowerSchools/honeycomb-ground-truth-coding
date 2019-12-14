@@ -13,7 +13,7 @@ export const Auth0Provider = ({
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState()
   const [user, setUser] = useState()
-  const [token, setToken] = useState()
+  // const [token, setToken] = useState()
   const [auth0Client, setAuth0] = useState()
   const [loading, setLoading] = useState(true)
   const [popupOpen, setPopupOpen] = useState(false)
@@ -35,8 +35,8 @@ export const Auth0Provider = ({
       if (isAuthenticated) {
         const user = await auth0FromHook.getUser()
         setUser(user)
-        const token = await auth0FromHook.getTokenSilently()
-        setToken(token)
+        // const token = await auth0FromHook.getTokenSilently()
+        // setToken(token)
       }
 
       setLoading(false)
@@ -56,8 +56,8 @@ export const Auth0Provider = ({
     }
     const user = await auth0Client.getUser()
     setUser(user)
-    const token = await auth0Client.getTokenSilently()
-    setToken(token)
+    // const token = await auth0Client.getTokenSilently()
+    // setToken(token)
     setIsAuthenticated(true)
   }
 
@@ -65,11 +65,11 @@ export const Auth0Provider = ({
     setLoading(true)
     await auth0Client.handleRedirectCallback()
     const user = await auth0Client.getUser()
-    const token = await auth0Client.getTokenSilently()
+    // const token = await auth0Client.getTokenSilently()
     setLoading(false)
     setIsAuthenticated(true)
     setUser(user)
-    setToken(token)
+    // setToken(token)
   }
   return (
     <Auth0Context.Provider
@@ -78,7 +78,7 @@ export const Auth0Provider = ({
         user,
         loading,
         popupOpen,
-        token,
+        // token,
         loginWithPopup,
         handleRedirectCallback,
         getIdTokenClaims: (...p) => auth0Client.getIdTokenClaims(...p),

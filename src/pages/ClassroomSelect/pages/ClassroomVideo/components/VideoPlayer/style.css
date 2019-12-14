@@ -1,0 +1,11 @@
+.hls-thumbnails .hls-container.inactive .embed-responsive-item {
+    opacity: 0.5;
+}
+
+.hls-thumbnails .hls-container {
+    border: 5px solid transparent;
+}
+
+.hls-thumbnails .hls-container:hover {
+    border: 5px #3a3a3a solid;
+}
