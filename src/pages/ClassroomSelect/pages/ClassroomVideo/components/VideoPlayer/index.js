@@ -13,7 +13,8 @@ import { useAuth0 } from "../../../../../../react-auth0-spa"
 import { useSettings } from "../../../../../../settings"
 import {
   useVideoStreamer,
-  getURLWithPath as getFullStreamURL
+  getURLWithPath as getFullStreamURL,
+  buildM3U8Path
 } from "../../../../../../apis/VideoStreamer"
 import {
   GET_CLASSROOM_VIDEO_FEED,
@@ -111,7 +112,14 @@ function Index(props) {
       setVideos(feedData["videos"])
 
       if (feedData["videos"].length > 0) {
-        setActiveVideoPath(feedData["videos"][0].url)
+        setActiveVideoPath(
+          buildM3U8Path(
+            classroomId,
+            videoDate,
+            feedData["videos"][0].device_name
+          )
+        )
+        //setActiveVideoPath(feedData["videos"][0].url)
       }
 
       setStartTime(feedData["start"])
@@ -164,13 +172,19 @@ function Index(props) {
       {!loading && (
         <Row style={{ marginTop: "20px" }} noGutters={true}>
           {videos.map((video, ii) => {
+            const actualVideoURL = buildM3U8Path(
+              classroomId,
+              videoDate,
+              video.device_name
+            )
+
             return (
               <OverlayTrigger
                 key={`hls-container-overlay-${ii}`}
                 placement={"top"}
                 overlay={
                   <Tooltip id={`hls-container-tooltip-${ii}`}>
-                    Camera: <strong>{video.sensor_name}</strong>.
+                    Camera: <strong>{video.device_name}</strong>.
                   </Tooltip>
                 }
               >
@@ -182,14 +196,14 @@ function Index(props) {
                   key={ii}
                   style={{ paddingTop: "10px" }}
                   onClick={() => {
-                    setActiveVideoPath(video.url)
+                    setActiveVideoPath(actualVideoURL)
                   }}
                 >
                   <HLSContainer
                     className={
-                      activeVideoPath === video.url ? "active" : "inactive"
+                      activeVideoPath === actualVideoURL ? "active" : "inactive"
                     }
-                    streamPath={video.url}
+                    streamPath={actualVideoURL}
                     controls={false}
                   />
                 </Col>

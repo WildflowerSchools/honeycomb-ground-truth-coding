@@ -10,6 +10,10 @@ export const getURLWithPath = path => {
   return combineURLs(VIDEO_STREAMER_BASE_URL, path)
 }
 
+export const buildM3U8Path = (classroomId, videoDate, deviceName) => {
+  return `videos/${classroomId}/${videoDate}/${deviceName}/output.m3u8`
+}
+
 /**
  * Wrap axios hook so an auth token can be injected in VideoStream API requests
  *
