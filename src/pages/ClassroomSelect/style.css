@@ -2,3 +2,9 @@
     min-width: 200px;
     text-align: center;
 }
+.classroom-input button {
+    min-width: 200px;
+}
+.classroom-input .dropdown-menu {
+    right: 0;
+}

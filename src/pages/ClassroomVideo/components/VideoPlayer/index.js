@@ -7,20 +7,20 @@ import {
   Row,
   Tooltip
 } from "react-bootstrap"
-import ButtonDatePicker from "../../../../components/ButtonDatePicker"
+import ButtonDatePicker from "../../../ClassroomSelect/components/ButtonDatePicker"
 import ReactHLS from "react-hls-player"
-import { useAuth0 } from "../../../../../../react-auth0-spa"
-import { useSettings } from "../../../../../../settings"
+import { useAuth0 } from "../../../../react-auth0-spa"
+import { useSettings } from "../../../../settings"
 import {
   useVideoStreamer,
   getURLWithPath as getFullStreamURL,
   buildM3U8Path
-} from "../../../../../../apis/VideoStreamer"
+} from "../../../../apis/VideoStreamer"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
-} from "../../../../../../apis/VideoStreamer/queries"
-import moment from "../../../../../../utils/moment"
+} from "../../../../apis/VideoStreamer/queries"
+import moment from "../../../../utils/moment"
 
 import "./style.css"
 
@@ -66,6 +66,7 @@ function HLSContainer(props) {
             hlsConfig={{
               xhrSetup: function(xhr, url) {
                 xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
+                //xhr.onreadystatechange = readystatechange.bind(this)
               }
             }}
             controls={controls}

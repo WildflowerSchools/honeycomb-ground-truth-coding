@@ -19,21 +19,24 @@ function Index(props) {
 
   return (
     <div>
-      <Container>
-        <Row className="justify-content-md-center">
-          <Button variant="primary" size="md" onClick={handleShowModal}>
-            Add Engagement
-          </Button>
-        </Row>
-      </Container>
-      <Card style={{ marginTop: "30px", minHeight: "300px" }}>
+      {/*<Container>*/}
+      {/*  <Row className="justify-content-md-center">*/}
+      {/*    <Button variant="primary" size="md" onClick={handleShowModal}>*/}
+      {/*      Add Engagement*/}
+      {/*    </Button>*/}
+      {/*  </Row>*/}
+      {/*</Container>*/}
+      <div
+        className="bg-white"
+        style={{ marginTop: "30px", minHeight: "300px" }}
+      >
         <Table striped bordered hover size="sm" responsive="sm">
           <thead>
             <tr>
               <th>Child</th>
               <th>Material</th>
               <th>Start</th>
-              <th>End</th>
+              <th>Duration</th>
               <th>
                 <FontAwesomeIcon icon={faToolbox} />
               </th>
@@ -44,7 +47,7 @@ function Index(props) {
               <td>Johnny</td>
               <td>Pink Tower</td>
               <td>10:35 AM</td>
-              <td>10:44 AM</td>
+              <td>5 minutes</td>
               <td>
                 <Container>
                   <Row className="justify-content-between">
@@ -63,7 +66,7 @@ function Index(props) {
             </tr>
           </tbody>
         </Table>
-      </Card>
+      </div>
       <Modal
         show={showModal}
         setShow={setShowModal}

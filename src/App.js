@@ -5,7 +5,7 @@ import { useAuth0 } from "./react-auth0-spa"
 
 import NavBar from "./components/NavBar"
 import ClassroomSelect from "./pages/ClassroomSelect"
-import ClassroomVideo from "./pages/ClassroomSelect/pages/ClassroomVideo"
+import ClassroomVideo from "./pages/ClassroomVideo"
 import { Container, Row } from "react-bootstrap"
 
 function Index(props) {

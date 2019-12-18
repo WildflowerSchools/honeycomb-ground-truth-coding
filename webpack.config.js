@@ -42,20 +42,23 @@ module.exports = (env, options) => {
     },
     devtool: build ? false : 'cheap-module-source-map',
     module: {
-      rules: [{
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader'
+          },
         },
-      }, {
-        test: /\.css$/i,
-        use: [
-          'to-string-loader',
-          'style-loader',
-          'css-loader'
-        ]
-      }]
+        {
+          test: /\.css$/i,
+          use: [
+            'to-string-loader',
+            'style-loader',
+            'css-loader'
+          ]
+        }
+      ]
     },
     plugins: [
       new DefinePlugin({
