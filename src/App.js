@@ -24,7 +24,7 @@ function Index(props) {
   return (
     <div ref={ref} className="wfs-app">
       {!isAuthenticated && (
-        <Container style={{ marginTop: "50px" }}>
+        <Container style={{ marginTop: "100px" }}>
           <Row className="justify-content-md-center">
             <div>Loading...</div>
           </Row>
@@ -33,7 +33,7 @@ function Index(props) {
       {isAuthenticated && (
         <div>
           <NavBar />
-          <Container style={{ marginTop: "50px" }}>
+          <Container style={{ marginTop: "100px" }}>
             <Switch>
               <PrivateRoute
                 path="/classrooms/:classroomId/:videoDate"

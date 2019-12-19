@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import { Dropdown, FormControl } from "react-bootstrap"
 import { useSettings } from "../../settings"
@@ -9,6 +9,8 @@ import "./style.css"
 
 function Index(props) {
   const { timezone, setTimezone } = useSettings()
+  const [filter, setFilter] = useState("")
+  const [filteredTimezones, setFilteredTimezones] = useState([])
 
   const timezones = moment.tz.names().map((timezone, _) => {
     const abbr = moment.tz(timezone).zoneAbbr()
@@ -22,9 +24,23 @@ function Index(props) {
       )} ${abbr} ${zoneName} ${utc}}`,
       title: timezone,
       timezone: timezone,
+      abbr: abbr,
+      zoneName: zoneName,
       details: `${abbr} | (${utc}) - ${zoneName}`
     }
   })
+
+  useEffect(() => {
+    setFilteredTimezones(
+      !filter
+        ? timezones
+        : timezones.filter(tz => {
+            return filter.split(" ").every(needle => {
+              return tz.search.toLowerCase().indexOf(needle) !== -1
+            })
+          })
+    )
+  }, [filter])
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <a
@@ -48,12 +64,11 @@ function Index(props) {
         style,
         className,
         "aria-labelledby": labeledBy,
-        filterdefault
+        setFilter,
+        filter
       },
       ref
     ) => {
-      const [filter, setFilter] = useState(filterdefault)
-
       return (
         <div
           ref={ref}
@@ -68,13 +83,7 @@ function Index(props) {
             onChange={e => setFilter(e.target.value)}
             value={filter}
           />
-          <ul className="list-unstyled">
-            {React.Children.toArray(children).filter(
-              child =>
-                !filter ||
-                child.props.timezone.search.toLowerCase().indexOf(filter) !== -1
-            )}
-          </ul>
+          <ul className="list-unstyled">{React.Children.toArray(children)}</ul>
         </div>
       )
     }
@@ -88,11 +97,13 @@ function Index(props) {
 
       <Dropdown.Menu
         className="timezone-dropdown-menu"
-        as={
-          CustomMenu
+        as={CustomMenu}
+        filter={filter}
+        setFilter={
+          setFilter
         } /*popperConfig={{placement: 'bottom', positionFixed: true}}*/
       >
-        {timezones.map((tz, idx) => {
+        {filteredTimezones.map((tz, idx) => {
           return (
             <Dropdown.Item
               key={idx}

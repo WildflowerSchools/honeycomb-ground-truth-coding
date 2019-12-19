@@ -8,9 +8,9 @@ body {
 #overlord {
   height: 100%;
   max-width: 100%;
-  margin-top: -20px;
   background-size: cover;
   padding: 0;
+  overflow: auto
 }
 
 #overlord::after {
@@ -29,7 +29,7 @@ body {
 
 .navbar {
   background-color: #fff;
-  padding-top: 24px;
+  padding-top: 10px;
   border-bottom: 2px solid #000;
 }
 

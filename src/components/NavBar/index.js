@@ -13,7 +13,7 @@ function Index(props) {
 
   return (
     <Navbar
-      className="justify-content-between"
+      className="justify-content-between fixed-top"
       aria-label="Navigation Bar with Classroom Select"
     >
       <Navbar.Brand>Wildflower Schools: Ground Truth Coding</Navbar.Brand>
