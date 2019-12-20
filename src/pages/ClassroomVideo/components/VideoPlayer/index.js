@@ -7,19 +7,19 @@ import {
   Row,
   Tooltip
 } from "react-bootstrap"
-import ButtonDatePicker from "../../../ClassroomSelect/components/ButtonDatePicker"
+import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import ReactHLS from "react-hls-player"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useSettings } from "../../../../settings"
 import {
   useVideoStreamer,
-  getURLWithPath as getFullStreamURL,
-  buildM3U8Path
+  getURLWithPath as getFullStreamURL
 } from "../../../../apis/VideoStreamer"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
 } from "../../../../apis/VideoStreamer/queries"
+import { TimezoneText } from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
@@ -169,12 +169,15 @@ function VideoThumbnailsSelection(props) {
 function Index(props) {
   const classroomId = props.classroomId
 
+  const TIME_FORMAT = "h:mm:ss A z"
+
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
   const [activeVideoPath, setActiveVideoPath] = useState()
   const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
+  const [playbackTime, setPlaybackTime] = useState()
 
   const {
     loading: listLoading,
@@ -198,8 +201,9 @@ function Index(props) {
         setActiveVideoPath(feedData["videos"][0].url)
       }
 
-      setStartTime(feedData["start"])
-      setEndTime(feedData["end"])
+      setStartTime(moment.utc(feedData["start"]))
+      setEndTime(moment.utc(feedData["end"]))
+      setPlaybackTime(moment.utc(feedData["start"]))
     }
   }, [feedLoading, feedData])
 
@@ -239,7 +243,7 @@ function Index(props) {
         <Col className="justify-content-end">
           <Container>
             <Row className="justify-content-end">
-              <h5>10:50 AM</h5>
+              <TimezoneText as="h5" utcDate={startTime} format={TIME_FORMAT} />
             </Row>
           </Container>
         </Col>

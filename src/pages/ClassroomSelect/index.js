@@ -5,7 +5,7 @@ import {
   LIST_CLASSROOMS,
   LIST_CLASSROOM_VIDEOS
 } from "../../apis/VideoStreamer/queries"
-import ButtonDatePicker from "./components/ButtonDatePicker"
+import ButtonDatePicker from "../../components/ButtonDatePicker"
 import { ROUTE_CLASSROOM_VIDEOS } from "../../routes"
 import moment from "../../utils/moment"
 

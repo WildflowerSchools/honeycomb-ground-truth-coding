@@ -17,6 +17,7 @@ function Index(props) {
 
   const [classroomId, setClassroomId] = useState(params.classroomId)
   const [videoDate, setVideoDate] = useState(params.videoDate)
+  const [videoTime, setVideoTime] = useState()
 
   return (
     <Container>

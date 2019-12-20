@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 
 import { Dropdown, FormControl } from "react-bootstrap"
-import { useSettings } from "../../settings"
+import { useSettings } from "../../../settings"
 
-import moment from "../../utils/moment"
+import moment from "../../../utils/moment"
 
 import "./style.css"
 

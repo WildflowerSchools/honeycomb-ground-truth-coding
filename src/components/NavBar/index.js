@@ -1,6 +1,6 @@
 import React from "react"
 import { Navbar, Nav, Button } from "react-bootstrap"
-import TimezoneDropdown from "../TimezoneDropdown"
+import TimezoneDropdown from "../Timezones/TimezoneDropdown"
 import { useAuth0 } from "../../react-auth0-spa"
 
 function Index(props) {

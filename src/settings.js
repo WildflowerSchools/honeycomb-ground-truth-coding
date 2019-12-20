@@ -1,3 +1,4 @@
+// TODO: Consider using apollo-client's local schema for settings
 import React, { useContext } from "react"
 import useLocalStorage from "react-use-localstorage"
 
