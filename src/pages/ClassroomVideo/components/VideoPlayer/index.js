@@ -25,7 +25,7 @@ import moment from "../../../../utils/moment"
 import "./style.css"
 
 function HLSContainer(props) {
-  const { streamPath, controls } = props
+  const { streamPath, controls, hidden, setHidden } = props
 
   const [accessToken, setAccessToken] = useState("")
   const { getTokenSilently } = useAuth0()
@@ -52,12 +52,13 @@ function HLSContainer(props) {
     return () => {
       isMounted = false
     }
-  }, [getTokenSilently, setAccessToken, hlsRef, ready])
+  }, [getTokenSilently, setAccessToken, ready])
 
   return (
     <ResponsiveEmbed
       className={`hls-container ${props.className}`}
       aspectRatio="4by3"
+      hidden={hidden}
     >
       {ready ? (
         <div>
@@ -66,7 +67,12 @@ function HLSContainer(props) {
             hlsConfig={{
               xhrSetup: function(xhr, url) {
                 xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
-                //xhr.onreadystatechange = readystatechange.bind(this)
+                // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
+                xhr.addEventListener("loadend", function() {
+                  if (xhr.status === 404) {
+                    setHidden(true)
+                  }
+                })
               }
             }}
             controls={controls}
@@ -80,8 +86,84 @@ function HLSContainer(props) {
   )
 }
 
-HLSContainer.defaultProps = {
-  counter: 0
+function VideoThumbnailsSelection(props) {
+  const { videos, onVideoSelected } = props
+
+  const [videosHidden, setVideosHidden] = useState(
+    videos.reduce((acc, video) => {
+      acc[video.url] = false
+      return acc
+    }, {})
+  )
+  const [activeVideo, setActiveVideo] = useState()
+
+  const handleVideoSelected = video => {
+    setActiveVideo(video)
+    onVideoSelected(video)
+  }
+
+  useEffect(() => {
+    setVideosHidden(
+      videos.reduce((acc, video) => {
+        acc[video.url] = false
+        return acc
+      }, {})
+    )
+    if (!activeVideo) {
+      setActiveVideo(videos[0])
+    }
+  }, [videos])
+
+  const setVideoHidden = (video, hidden) => {
+    setVideosHidden(prev => Object.assign({}, prev, { [video.url]: hidden }))
+  }
+
+  return (
+    <Row style={{ marginTop: "20px" }} noGutters={true}>
+      {videos.map((video, ii) => {
+        return (
+          <OverlayTrigger
+            key={`hls-container-overlay-${ii}`}
+            className={videosHidden[video.url] ? "d-none" : ""}
+            placement={"top"}
+            overlay={
+              <Tooltip id={`hls-container-tooltip-${ii}`}>
+                Camera: <strong>{video.device_name}</strong>.
+              </Tooltip>
+            }
+          >
+            <Col
+              className={[
+                "hls-thumbnails",
+                videosHidden[video.url] ? "d-none" : ""
+              ].join(" ")}
+              xs={4}
+              md={3}
+              lg={2}
+              key={ii}
+              style={{ paddingTop: "10px" }}
+              onClick={() => {
+                handleVideoSelected(video)
+              }}
+            >
+              <HLSContainer
+                className={[
+                  activeVideo === video.url ? "active" : "inactive",
+                  videosHidden[video.url] ? "d-none" : ""
+                ].join(" ")}
+                streamPath={video.url}
+                controls={false}
+                hidden={videosHidden[video.url]}
+                setHidden={hidden => {
+                  setVideoHidden(video, hidden)
+                }}
+              />
+            </Col>
+          </OverlayTrigger>
+        )
+      })}
+    </Row>
+  )
 }
 
 function Index(props) {
@@ -105,7 +187,7 @@ function Index(props) {
     error: feedError
   } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate))
 
-  const { isAuthenticated, loading, getTokenSilently } = useAuth0()
+  const { loading } = useAuth0()
   const { timezone, setTimezone } = useSettings()
 
   useEffect(() => {
@@ -113,14 +195,7 @@ function Index(props) {
       setVideos(feedData["videos"])
 
       if (feedData["videos"].length > 0) {
-        setActiveVideoPath(
-          buildM3U8Path(
-            classroomId,
-            videoDate,
-            feedData["videos"][0].device_name
-          )
-        )
-        //setActiveVideoPath(feedData["videos"][0].url)
+        setActiveVideoPath(feedData["videos"][0].url)
       }
 
       setStartTime(feedData["start"])
@@ -171,47 +246,12 @@ function Index(props) {
       </Row>
       <hr />
       {!loading && (
-        <Row style={{ marginTop: "20px" }} noGutters={true}>
-          {videos.map((video, ii) => {
-            const actualVideoURL = buildM3U8Path(
-              classroomId,
-              videoDate,
-              video.device_name
-            )
-
-            return (
-              <OverlayTrigger
-                key={`hls-container-overlay-${ii}`}
-                placement={"top"}
-                overlay={
-                  <Tooltip id={`hls-container-tooltip-${ii}`}>
-                    Camera: <strong>{video.device_name}</strong>.
-                  </Tooltip>
-                }
-              >
-                <Col
-                  className={"hls-thumbnails"}
-                  xs={4}
-                  md={3}
-                  lg={2}
-                  key={ii}
-                  style={{ paddingTop: "10px" }}
-                  onClick={() => {
-                    setActiveVideoPath(actualVideoURL)
-                  }}
-                >
-                  <HLSContainer
-                    className={
-                      activeVideoPath === actualVideoURL ? "active" : "inactive"
-                    }
-                    streamPath={actualVideoURL}
-                    controls={false}
-                  />
-                </Col>
-              </OverlayTrigger>
-            )
-          })}
-        </Row>
+        <VideoThumbnailsSelection
+          videos={videos}
+          onVideoSelected={video => {
+            setActiveVideoPath(video.url)
+          }}
+        />
       )}
     </Container>
   )
