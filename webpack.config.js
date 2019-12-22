@@ -62,12 +62,12 @@ module.exports = (env, options) => {
     },
     plugins: [
       new DefinePlugin({
-        'process.env.GRAPHQL_URL': JSON.stringify(process.env.GRAPHQL_URL),
-        'process.env.VIDEO_STREAM_URL': JSON.stringify(process.env.VIDEO_STREAM_URL),
-        'process.env.AUTH0_CLIENT': JSON.stringify(process.env.AUTH0_CLIENT),
+        'process.env.HONEYCOMB_URI': JSON.stringify(process.env.HONEYCOMB_URI),
+        'process.env.HONEYCOMB_VIDEO_STREAM_URI': JSON.stringify(process.env.HONEYCOMB_VIDEO_STREAM_URI),
+        'process.env.AUTH0_CLIENT_ID': JSON.stringify(process.env.AUTH0_CLIENT_ID),
         'process.env.AUTH0_DOMAIN': JSON.stringify(process.env.AUTH0_DOMAIN),
         'process.env.AUTH0_CALLBACK': JSON.stringify(process.env.AUTH0_CALLBACK),
-        'process.env.AUTH0_AUDIENCE': JSON.stringify(process.env.AUTH0_AUDIENCE)
+        'process.env.HONEYCOMB_AUDIENCE': JSON.stringify(process.env.HONEYCOMB_AUDIENCE)
       }),
       new ErrorOverlayPlugin(),
       new HtmlWebpackPlugin({

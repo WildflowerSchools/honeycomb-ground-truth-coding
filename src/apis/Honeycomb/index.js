@@ -10,7 +10,7 @@ import { InMemoryCache } from "apollo-cache-inmemory"
 
 import { useAuth0 } from "../../react-auth0-spa"
 
-const HONEYCOMB_BASE_URL = process.env.GRAPHQL_URL
+const HONEYCOMB_BASE_URL = process.env.HONEYCOMB_URI
 
 export const HoneycombProvider = ({ children }) => {
   const { getTokenSilently, loading } = useAuth0()

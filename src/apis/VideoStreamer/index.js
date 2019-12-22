@@ -4,7 +4,7 @@ import { makeUseAxios } from "axios-hooks"
 import { useAuth0 } from "../../react-auth0-spa"
 import { combineURLs } from "../../utils/helper"
 
-const VIDEO_STREAMER_BASE_URL = process.env.VIDEO_STREAM_URL
+const VIDEO_STREAMER_BASE_URL = process.env.HONEYCOMB_VIDEO_STREAM_URI
 
 export const getURLWithPath = path => {
   return combineURLs(VIDEO_STREAMER_BASE_URL, path)
