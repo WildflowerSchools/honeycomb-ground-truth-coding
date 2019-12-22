@@ -24,3 +24,10 @@ docker-compose up --build
 docker build . -t ground_truth_coding_prod
 docker run --env-file ./.env -p 80:80 ground_truth_coding_prod
 ```
+
+## Commit tagged release
+
+```
+git tag -a v`date -u "+%Y-%m-%d-%H-%M-%S"` -m ""
+git push origin `git describe --abbrev=0`
+```

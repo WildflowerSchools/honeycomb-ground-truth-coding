@@ -59,6 +59,7 @@
   },
   "scripts": {
     "start": "npm run clean && webpack-dev-server --mode development",
+    "docker-dev": "npm run clean && webpack-dev-server --mode development --host 0.0.0.0",
     "build": "npm run clean && webpack --mode production",
     "clean": "rm -rf build/*",
     "test": "echo 'tsk tsk... you should be testing'",
