@@ -8,14 +8,13 @@ function Index(props) {
   const Wrapper = props.as || "div"
   const { utcDate, format, ...otherProps } = props
 
-  if (Wrapper) {
-    if (!utcDate) {
-      return <div>"loading..."</div>
-    }
-    return (
-      <Wrapper {...otherProps}>{utcDate.tz(timezone).format(format)}</Wrapper>
-    )
+  if (!utcDate) {
+    return <div>loading...</div>
   }
+
+  return (
+    <Wrapper {...otherProps}>{utcDate.tz(timezone).format(format)}</Wrapper>
+  )
 }
 
 export default Index
