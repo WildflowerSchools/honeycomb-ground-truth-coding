@@ -1,8 +1,0 @@
-{
-  "domain": "wildflowerschools.auth0.com",
-  "clientId": "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
-  "responseType": "token id_token",
-  "audience": "https://honeycomb.api.wildflowerschools.org",
-  "redirectUri": "http://localhost:3000",
-  "scope": "openid profile video:view"
-}

@@ -22,7 +22,7 @@ docker-compose up --build
 
 ```
 docker build . -t ground_truth_coding_prod
-docker run --env-file ./.env -p 80:80 ground_truth_coding_prod
+docker run --env-file ./.env -p 3000:80 ground_truth_coding_prod
 ```
 
 ## Commit tagged release

@@ -43,7 +43,7 @@ export const GET_STUDENTS = gql`
 
 export const GET_INTERACTION_ENUMS = gql`
   query interactionEnums {
-    enumObservationCodes: __type(name: "ObservationCodes") {
+    enumObservationCodes: __type(name: "ObservationCode") {
       name
       enumValues {
         name

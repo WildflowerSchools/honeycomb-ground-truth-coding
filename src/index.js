@@ -5,7 +5,6 @@ import ReactDOM from "react-dom"
 import { Auth0Provider } from "./react-auth0-spa"
 import { BrowserRouter } from "react-router-dom"
 import App from "./App"
-import config from "./auth_config.json"
 import history from "./utils/history"
 import { HoneycombProvider } from "./apis/Honeycomb"
 import { SettingsProvider } from "./settings"
@@ -23,14 +22,22 @@ const onRedirectCallback = appState => {
   )
 }
 
+const authConfig = {
+  "audience": process.env.HONEYCOMB_AUDIENCE || "https://honeycomb.api.wildflowerschools.org",
+  "clientId": process.env.AUTH0_CLIENT_ID || "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
+  "domain":  process.env.AUTH0_DOMAIN || "wildflowerschools.auth0.com",
+  "responseType": "token id_token",
+  "scope": "openid profile video:view"
+}
+
 ReactDOM.render(
   <Auth0Provider
-    domain={config.domain}
-    client_id={config.clientId}
+    domain={authConfig.domain}
+    client_id={authConfig.clientId}
     redirect_uri={window.location.origin}
-    audience={config.audience}
-    response_type={config.responseType}
-    scope={config.scope}
+    audience={authConfig.audience}
+    response_type={authConfig.responseType}
+    scope={authConfig.scope}
     onRedirectCallback={onRedirectCallback}
   >
     <BrowserRouter>

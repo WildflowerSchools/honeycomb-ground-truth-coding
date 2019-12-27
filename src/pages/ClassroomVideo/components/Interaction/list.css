@@ -1,0 +1,6 @@
+.dropdown.caret-off .dropdown-toggle::before {
+    display: none;
+}
+.dropdown.caret-off .dropdown-toggle::after {
+    display: none;
+}

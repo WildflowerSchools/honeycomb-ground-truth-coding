@@ -1,11 +1,13 @@
 import React, { useState } from "react"
-import { Button, Card, Container, Row, Table } from "react-bootstrap"
+import { Button, Card, Container, Dropdown, DropdownButton,  Row, Table } from "react-bootstrap"
 
 import Modal from "./modal"
 
+import "./list.css"
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
-  faPlay,
+  faEye,
   faPen,
   faToolbox,
   faTrash
@@ -18,7 +20,7 @@ function Index(props) {
   const handleShowModal = () => setShowModal(true)
 
   return (
-    <div>
+    <Card className="bg-white" style={{ marginTop: "30px", minHeight: "300px" }}>
       {/*<Container>*/}
       {/*  <Row className="justify-content-md-center">*/}
       {/*    <Button variant="primary" size="md" onClick={handleShowModal}>*/}
@@ -26,54 +28,43 @@ function Index(props) {
       {/*    </Button>*/}
       {/*  </Row>*/}
       {/*</Container>*/}
-      <div
-        className="bg-white"
-        style={{ marginTop: "30px", minHeight: "300px" }}
-      >
-        <Table striped bordered hover size="sm" responsive="sm">
-          <thead>
-            <tr>
-              <th>Child</th>
-              <th>Material</th>
-              <th>Start</th>
-              <th>Duration</th>
-              <th>
-                <FontAwesomeIcon icon={faToolbox} />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Johnny</td>
-              <td>Pink Tower</td>
-              <td>10:35 AM</td>
-              <td>5 minutes</td>
-              <td>
-                <Container>
-                  <Row className="justify-content-between">
-                    <a href="#">
-                      <FontAwesomeIcon icon={faPlay} />
-                    </a>
-                    <a href="#">
-                      <FontAwesomeIcon icon={faPen} />
-                    </a>
-                    <a href="#">
-                      <FontAwesomeIcon icon={faTrash} />
-                    </a>
-                  </Row>
-                </Container>
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-      </div>
+      <Table striped bordered hover size="sm" responsive="sm">
+        <thead>
+          <tr>
+            <th>Child</th>
+            <th>Material</th>
+            <th>Start</th>
+            <th>Duration</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Johnny</td>
+            <td>Pink Tower</td>
+            <td>10:35 AM</td>
+            <td>5 minutes</td>
+            <td>
+                <DropdownButton
+                  size="sm"
+                  variant="secondary"
+                  title={<FontAwesomeIcon icon={faEye} />}
+                  className="caret-off"
+                >
+                    <Dropdown.Item onClick={() => {console.log("edit")}}><FontAwesomeIcon icon={faPen} /></Dropdown.Item>
+                    <Dropdown.Item onClick={() => {console.log("delete")}}><FontAwesomeIcon icon={faTrash} /></Dropdown.Item>
+                </DropdownButton>
+            </td>
+          </tr>
+        </tbody>
+      </Table>
       <Modal
         show={showModal}
         setShow={setShowModal}
         handleClose={handleCloseModal}
         handleShow={handleShowModal}
       />
-    </div>
+    </Card>
   )
 }
 
