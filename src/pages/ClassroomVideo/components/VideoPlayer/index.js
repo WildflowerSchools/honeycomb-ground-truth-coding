@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef, useCallback } from "react"
 import {
   Container,
   Col,
@@ -9,6 +9,7 @@ import {
 } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import ReactPlayer from "react-player"
+import { Stage, Layer, Rect, Text } from 'react-konva'
 import { useAuth0 } from "../../../../react-auth0-spa"
 import {
   useVideoStreamer,
@@ -31,23 +32,40 @@ function usePrevious(value) {
   return ref.current
 }
 
-function HLSContainer(props) {
+function VideoContainer(props) {
   const {
     streamPath,
     controls,
     hidden,
     setHidden,
+    showGeomLayer,
     onProgress,
     startPlaybackAt
   } = props
 
   const [accessToken, setAccessToken] = useState("")
   const [playing, setPlaying] = useState(false)
+  const [hlsRef, setHlsRef] = useState(null)
+  const [rectRef, setRectRef] = useState(null)
   const { getTokenSilently } = useAuth0()
 
   const ready = streamPath !== undefined && accessToken !== ""
 
-  const hlsRef = useRef()
+  const hlsRefSet = useCallback(ref => {
+      setHlsRef(ref)
+  })
+
+  useEffect( () => {
+    let period = 500
+
+    if (rectRef) {
+      const anim = new Konva.Animation(frame => {
+        rectRef.opacity((Math.sin(frame.time / period) + 1) / 2)
+      }, rectRef.getLayer())
+
+      anim.start()
+    }
+  }, [rectRef])
 
   useEffect(() => {
     let isMounted = true
@@ -88,52 +106,75 @@ function HLSContainer(props) {
   }
 
   return (
-    <ResponsiveEmbed
-      className={`hls-container ${props.className}`}
-      aspectRatio="4by3"
-      hidden={hidden}
-    >
+    <>
       {ready ? (
-        <div>
-          <ReactPlayer
-            key={`react-player-${streamPath}`}
-            ref={hlsRef}
-            config={{
-              file: {
-                hlsOptions: {
-                  xhrSetup: function(xhr, url) {
-                    xhr.setRequestHeader(
-                      "Authorization",
-                      `Bearer ${accessToken}`
-                    )
-                    // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-                    xhr.addEventListener("loadend", function() {
-                      if (xhr.status === 404) {
-                        setHidden(true)
-                      }
-                    })
-                  },
-                  startPosition: startPlaybackAt
-                }
+        <>
+          <ResponsiveEmbed
+            className={`hls-container ${props.className}`}
+            aspectRatio="4by3"
+            hidden={hidden}
+          >
+            <div>
+              {showGeomLayer &&
+                <Stage
+                  style={{zIndex: 1000, position: 'absolute'}}
+                  width={hlsRef  ? hlsRef.wrapper.firstElementChild.getBoundingClientRect().width : 0}
+                  height={hlsRef  ? hlsRef.wrapper.firstElementChild.getBoundingClientRect().height : 0}>
+                  <Layer>
+                    <Rect
+                      x={20}
+                      y={20}
+                      width={50}
+                      height={50}
+                      fill='green'
+                      shadowBlur={5}
+                      ref={node => {
+                        setRectRef(node)
+                      }}/>
+                  </Layer>
+                </Stage>
               }
-            }}
-            controls={controls}
-            url={getFullStreamURL(streamPath)}
-            pip={false}
-            onProgress={handleOnProgress}
-            onPause={handleOnPause}
-            onPlay={handleOnPlay}
-            onEnded={handleOnEnded}
-            playing={playing}
-          />
-        </div>
+              <ReactPlayer
+                key={`react-player-${streamPath}`}
+                ref={hlsRefSet}
+                config={{
+                  file: {
+                    hlsOptions: {
+                      xhrSetup: function(xhr, url) {
+                        xhr.setRequestHeader(
+                          "Authorization",
+                          `Bearer ${accessToken}`
+                        )
+                        // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
+                        xhr.addEventListener("loadend", function() {
+                          if (xhr.status === 404) {
+                            setHidden(true)
+                          }
+                        })
+                      },
+                      startPosition: startPlaybackAt
+                    }
+                  }
+                }}
+                controls={controls}
+                url={getFullStreamURL(streamPath)}
+                pip={false}
+                onProgress={handleOnProgress}
+                onPause={handleOnPause}
+                onPlay={handleOnPlay}
+                onEnded={handleOnEnded}
+                playing={playing}
+              />
+            </div>
+          </ResponsiveEmbed>
+        </>
       ) : (
-        <div />
+        <></>
       )}
-    </ResponsiveEmbed>
+    </>
   )
 }
-HLSContainer.defaultProps = { startPlaybackAt: 0 }
+VideoContainer.defaultProps = { startPlaybackAt: 0, hidden: false, showGeomLayer: false }
 
 function VideoThumbnailsSelection(props) {
   const { videos, onVideoSelected } = props
@@ -195,14 +236,14 @@ function VideoThumbnailsSelection(props) {
                 handleVideoSelected(video)
               }}
             >
-              <HLSContainer
+              <VideoContainer
                 className={[
                   activeVideoUrl === video.url ? "active" : "inactive",
                   videosHidden[video.url] ? "d-none" : ""
                 ].join(" ")}
                 streamPath={video.url}
                 controls={false}
-                hidden={videosHidden[video.url]}
+                hidden={!!videosHidden[video.url]}
                 setHidden={hidden => {
                   setVideoHidden(video, hidden)
                 }}
@@ -284,9 +325,10 @@ function Index(props) {
       <Row>
         <Col lg>
           {!loading && (
-            <HLSContainer
+            <VideoContainer
               streamPath={activeVideoUrl}
               controls={true}
+              showGeomLayer={true}
               onProgress={onPlaybackProgress}
               startPlaybackAt={playbackProgress}
             />
