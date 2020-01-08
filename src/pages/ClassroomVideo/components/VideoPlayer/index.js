@@ -9,7 +9,8 @@ import {
 } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import ReactPlayer from "react-player"
-import { Stage, Layer, Rect, Text } from 'react-konva'
+import { Stage, Layer, Rect, Text } from "react-konva"
+import GeomProjection from "./geom_projection"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import {
   useVideoStreamer,
@@ -23,14 +24,6 @@ import { TimezoneText } from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
-
-function usePrevious(value) {
-  const ref = useRef()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
 
 function VideoContainer(props) {
   const {
@@ -52,20 +45,8 @@ function VideoContainer(props) {
   const ready = streamPath !== undefined && accessToken !== ""
 
   const hlsRefSet = useCallback(ref => {
-      setHlsRef(ref)
+    setHlsRef(ref)
   })
-
-  useEffect( () => {
-    let period = 500
-
-    if (rectRef) {
-      const anim = new Konva.Animation(frame => {
-        rectRef.opacity((Math.sin(frame.time / period) + 1) / 2)
-      }, rectRef.getLayer())
-
-      anim.start()
-    }
-  }, [rectRef])
 
   useEffect(() => {
     let isMounted = true
@@ -115,25 +96,22 @@ function VideoContainer(props) {
             hidden={hidden}
           >
             <div>
-              {showGeomLayer &&
-                <Stage
-                  style={{zIndex: 1000, position: 'absolute'}}
-                  width={hlsRef  ? hlsRef.wrapper.firstElementChild.getBoundingClientRect().width : 0}
-                  height={hlsRef  ? hlsRef.wrapper.firstElementChild.getBoundingClientRect().height : 0}>
-                  <Layer>
-                    <Rect
-                      x={20}
-                      y={20}
-                      width={50}
-                      height={50}
-                      fill='green'
-                      shadowBlur={5}
-                      ref={node => {
-                        setRectRef(node)
-                      }}/>
-                  </Layer>
-                </Stage>
-              }
+              {showGeomLayer && (
+                <GeomProjection
+                  width={
+                    hlsRef
+                      ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
+                          .width
+                      : 0
+                  }
+                  height={
+                    hlsRef
+                      ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
+                          .height
+                      : 0
+                  }
+                />
+              )}
               <ReactPlayer
                 key={`react-player-${streamPath}`}
                 ref={hlsRefSet}
@@ -174,7 +152,11 @@ function VideoContainer(props) {
     </>
   )
 }
-VideoContainer.defaultProps = { startPlaybackAt: 0, hidden: false, showGeomLayer: false }
+VideoContainer.defaultProps = {
+  startPlaybackAt: 0,
+  hidden: false,
+  showGeomLayer: false
+}
 
 function VideoThumbnailsSelection(props) {
   const { videos, onVideoSelected } = props

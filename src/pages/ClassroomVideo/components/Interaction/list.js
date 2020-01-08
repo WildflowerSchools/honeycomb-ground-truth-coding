@@ -1,5 +1,13 @@
 import React, { useState } from "react"
-import { Button, Card, Container, Dropdown, DropdownButton,  Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Card,
+  Container,
+  Dropdown,
+  DropdownButton,
+  Row,
+  Table
+} from "react-bootstrap"
 
 import Modal from "./modal"
 
@@ -20,7 +28,10 @@ function Index(props) {
   const handleShowModal = () => setShowModal(true)
 
   return (
-    <Card className="bg-white" style={{ marginTop: "30px", minHeight: "300px" }}>
+    <Card
+      className="bg-white"
+      style={{ marginTop: "30px", minHeight: "300px" }}
+    >
       {/*<Container>*/}
       {/*  <Row className="justify-content-md-center">*/}
       {/*    <Button variant="primary" size="md" onClick={handleShowModal}>*/}
@@ -45,15 +56,27 @@ function Index(props) {
             <td>10:35 AM</td>
             <td>5 minutes</td>
             <td>
-                <DropdownButton
-                  size="sm"
-                  variant="secondary"
-                  title={<FontAwesomeIcon icon={faEye} />}
-                  className="caret-off"
+              <DropdownButton
+                size="sm"
+                variant="secondary"
+                title={<FontAwesomeIcon icon={faEye} />}
+                className="caret-off"
+              >
+                <Dropdown.Item
+                  onClick={() => {
+                    console.log("edit")
+                  }}
                 >
-                    <Dropdown.Item onClick={() => {console.log("edit")}}><FontAwesomeIcon icon={faPen} /></Dropdown.Item>
-                    <Dropdown.Item onClick={() => {console.log("delete")}}><FontAwesomeIcon icon={faTrash} /></Dropdown.Item>
-                </DropdownButton>
+                  <FontAwesomeIcon icon={faPen} />
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => {
+                    console.log("delete")
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </Dropdown.Item>
+              </DropdownButton>
             </td>
           </tr>
         </tbody>

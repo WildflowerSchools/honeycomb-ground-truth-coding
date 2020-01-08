@@ -23,11 +23,13 @@ const onRedirectCallback = appState => {
 }
 
 const authConfig = {
-  "audience": process.env.HONEYCOMB_AUDIENCE || "https://honeycomb.api.wildflowerschools.org",
-  "clientId": process.env.AUTH0_CLIENT_ID || "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
-  "domain":  process.env.AUTH0_DOMAIN || "wildflowerschools.auth0.com",
-  "responseType": "token id_token",
-  "scope": "openid profile video:view"
+  audience:
+    process.env.HONEYCOMB_AUDIENCE ||
+    "https://honeycomb.api.wildflowerschools.org",
+  clientId: process.env.AUTH0_CLIENT_ID || "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
+  domain: process.env.AUTH0_DOMAIN || "wildflowerschools.auth0.com",
+  responseType: "token id_token",
+  scope: "openid profile video:view"
 }
 
 ReactDOM.render(
