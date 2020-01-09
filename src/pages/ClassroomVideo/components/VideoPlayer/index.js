@@ -1,21 +1,9 @@
-import React, { useEffect, useState, useRef, useCallback } from "react"
-import {
-  Container,
-  Col,
-  OverlayTrigger,
-  ResponsiveEmbed,
-  Row,
-  Tooltip
-} from "react-bootstrap"
+import React, { useEffect, useState } from "react"
+import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
-import ReactPlayer from "react-player"
-import { Stage, Layer, Rect, Text } from "react-konva"
-import GeomProjection from "./geom_projection"
 import { useAuth0 } from "../../../../react-auth0-spa"
-import {
-  useVideoStreamer,
-  getURLWithPath as getFullStreamURL
-} from "../../../../apis/VideoStreamer"
+import { useVideoStreamer } from "../../../../apis/VideoStreamer"
+import VideoPlayer from "./video_player"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
@@ -24,139 +12,6 @@ import { TimezoneText } from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
-
-function VideoContainer(props) {
-  const {
-    streamPath,
-    controls,
-    hidden,
-    setHidden,
-    showGeomLayer,
-    onProgress,
-    startPlaybackAt
-  } = props
-
-  const [accessToken, setAccessToken] = useState("")
-  const [playing, setPlaying] = useState(false)
-  const [hlsRef, setHlsRef] = useState(null)
-  const [rectRef, setRectRef] = useState(null)
-  const { getTokenSilently } = useAuth0()
-
-  const ready = streamPath !== undefined && accessToken !== ""
-
-  const hlsRefSet = useCallback(ref => {
-    setHlsRef(ref)
-  })
-
-  useEffect(() => {
-    let isMounted = true
-
-    const getAccessToken = async () => {
-      try {
-        const token = await getTokenSilently()
-        if (isMounted) {
-          setAccessToken(token)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    getAccessToken()
-
-    return () => {
-      isMounted = false
-    }
-  }, [getTokenSilently, setAccessToken, ready])
-
-  const handleOnProgress = progress => {
-    if (onProgress) {
-      onProgress(progress)
-    }
-  }
-
-  const handleOnPause = () => {
-    setPlaying(false)
-  }
-
-  const handleOnPlay = () => {
-    setPlaying(true)
-  }
-
-  const handleOnEnded = () => {
-    setPlaying(false)
-  }
-
-  return (
-    <>
-      {ready ? (
-        <>
-          <ResponsiveEmbed
-            className={`hls-container ${props.className}`}
-            aspectRatio="4by3"
-            hidden={hidden}
-          >
-            <div>
-              {showGeomLayer && (
-                <GeomProjection
-                  width={
-                    hlsRef
-                      ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
-                          .width
-                      : 0
-                  }
-                  height={
-                    hlsRef
-                      ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
-                          .height
-                      : 0
-                  }
-                />
-              )}
-              <ReactPlayer
-                key={`react-player-${streamPath}`}
-                ref={hlsRefSet}
-                config={{
-                  file: {
-                    hlsOptions: {
-                      xhrSetup: function(xhr, url) {
-                        xhr.setRequestHeader(
-                          "Authorization",
-                          `Bearer ${accessToken}`
-                        )
-                        // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-                        xhr.addEventListener("loadend", function() {
-                          if (xhr.status === 404) {
-                            setHidden(true)
-                          }
-                        })
-                      },
-                      startPosition: startPlaybackAt
-                    }
-                  }
-                }}
-                controls={controls}
-                url={getFullStreamURL(streamPath)}
-                pip={false}
-                onProgress={handleOnProgress}
-                onPause={handleOnPause}
-                onPlay={handleOnPlay}
-                onEnded={handleOnEnded}
-                playing={playing}
-              />
-            </div>
-          </ResponsiveEmbed>
-        </>
-      ) : (
-        <></>
-      )}
-    </>
-  )
-}
-VideoContainer.defaultProps = {
-  startPlaybackAt: 0,
-  hidden: false,
-  showGeomLayer: false
-}
 
 function VideoThumbnailsSelection(props) {
   const { videos, onVideoSelected } = props
@@ -218,7 +73,7 @@ function VideoThumbnailsSelection(props) {
                 handleVideoSelected(video)
               }}
             >
-              <VideoContainer
+              <VideoPlayer
                 className={[
                   activeVideoUrl === video.url ? "active" : "inactive",
                   videosHidden[video.url] ? "d-none" : ""
@@ -307,7 +162,7 @@ function Index(props) {
       <Row>
         <Col lg>
           {!loading && (
-            <VideoContainer
+            <VideoPlayer
               streamPath={activeVideoUrl}
               controls={true}
               showGeomLayer={true}

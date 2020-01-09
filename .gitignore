@@ -1,4 +1,5 @@
 node_modules
 build
+**/geom_frames_full.json
 
 
