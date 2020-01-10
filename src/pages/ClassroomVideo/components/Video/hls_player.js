@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { ResponsiveEmbed } from "react-bootstrap"
-import GeomLayer from "./layer_geoms"
+import GeomLayer from "./geom_layer"
 import ReactPlayer from "react-player"
 import { getURLWithPath as getFullStreamURL } from "../../../../apis/VideoStreamer"
 
-function VideoPlayer(props) {
+function Index(props) {
   const {
     streamPath,
     controls,
@@ -13,13 +13,14 @@ function VideoPlayer(props) {
     setHidden,
     showGeomLayer,
     onProgress,
-    startPlaybackAt
+    startPlaybackAt,
+    startTime,
+    deviceName
   } = props
 
   const [accessToken, setAccessToken] = useState("")
   const [playing, setPlaying] = useState(false)
   const [hlsRef, setHlsRef] = useState(null)
-  const [rectRef, setRectRef] = useState(null)
   const { getTokenSilently } = useAuth0()
 
   const ready = streamPath !== undefined && accessToken !== ""
@@ -82,6 +83,8 @@ function VideoPlayer(props) {
                     className={`geom-layer`}
                     style={{ pointerEvents: "none" }}
                     getElapsed={hlsRef.getCurrentTime}
+                    videoStartTime={startTime}
+                    deviceName={deviceName}
                     width={
                       hlsRef
                         ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
@@ -137,10 +140,10 @@ function VideoPlayer(props) {
     </>
   )
 }
-VideoPlayer.defaultProps = {
+Index.defaultProps = {
   startPlaybackAt: 0,
   hidden: false,
   showGeomLayer: false
 }
 
-export default VideoPlayer
+export default Index

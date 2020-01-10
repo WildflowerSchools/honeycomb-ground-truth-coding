@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { Container, Col, Row } from "react-bootstrap"
 
 import { InteractionList, InteractionForm } from "./components/Interaction"
-import VideoPlayer from "./components/VideoPlayer"
+import VideoPlayer from "./components/Video"
 import { ROUTE_CLASSROOM_SELECT } from "../../routes"
 
 function Index(props) {

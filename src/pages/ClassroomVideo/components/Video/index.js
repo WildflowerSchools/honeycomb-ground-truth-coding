@@ -3,7 +3,7 @@ import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useVideoStreamer } from "../../../../apis/VideoStreamer"
-import VideoPlayer from "./video_player"
+import HLSPlayer from "./hls_player"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
@@ -73,7 +73,7 @@ function VideoThumbnailsSelection(props) {
                 handleVideoSelected(video)
               }}
             >
-              <VideoPlayer
+              <HLSPlayer
                 className={[
                   activeVideoUrl === video.url ? "active" : "inactive",
                   videosHidden[video.url] ? "d-none" : ""
@@ -100,7 +100,7 @@ function Index(props) {
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
-  const [activeVideoUrl, setActiveVideoUrl] = useState()
+  const [activeVideo, setActiveVideo] = useState()
   const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
@@ -125,7 +125,7 @@ function Index(props) {
       setVideos(feedData["videos"])
 
       if (feedData["videos"].length > 0) {
-        setActiveVideoUrl(feedData["videos"][0].url)
+        setActiveVideo(feedData["videos"][0])
       }
 
       setStartTime(moment.utc(feedData["start"]))
@@ -154,20 +154,22 @@ function Index(props) {
   }
 
   const onVideoSelected = video => {
-    setActiveVideoUrl(video.url)
+    setActiveVideo(video)
   }
 
   return (
     <Container>
       <Row>
         <Col lg>
-          {!loading && (
-            <VideoPlayer
-              streamPath={activeVideoUrl}
+          {!loading && activeVideo && (
+            <HLSPlayer
+              streamPath={activeVideo.url}
+              deviceName={activeVideo.device_name}
               controls={true}
               showGeomLayer={true}
               onProgress={onPlaybackProgress}
               startPlaybackAt={playbackProgress}
+              startTime={startTime}
             />
           )}
         </Col>
