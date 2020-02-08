@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from "react"
-import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
+import {
+  Container,
+  Col,
+  Form,
+  OverlayTrigger,
+  Row,
+  Tooltip
+} from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useVideoStreamer } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
+import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
+import { useQuery } from "@apollo/react-hooks"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
@@ -25,6 +34,7 @@ function VideoThumbnailsSelection(props) {
   const [activeVideoUrl, setActiveVideoUrl] = useState()
 
   const handleVideoSelected = video => {
+    console.log("Video selected")
     setActiveVideoUrl(video.url)
     onVideoSelected(video)
   }
@@ -101,6 +111,7 @@ function Index(props) {
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
   const [activeVideo, setActiveVideo] = useState()
+  const [activeVideoDeviceId, setActiveVideoDeviceId] = useState()
   const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
@@ -117,6 +128,13 @@ function Index(props) {
     loading: feedLoading,
     error: feedError
   } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate))
+  const {
+    loading: assignmentsLoading,
+    error: assignmentsError,
+    data: assignmentsData
+  } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS, {
+    variables: { environment_id: classroomId }
+  })
 
   const { loading } = useAuth0()
 
@@ -144,6 +162,15 @@ function Index(props) {
     }
   }, [listLoading, listData])
 
+  useEffect(() => {
+    if (!assignmentsLoading && assignmentsData && activeVideo) {
+      const assignment = assignmentsData["getEnvironment"]["assignments"].find(
+        a => a["assignment_id"] === activeVideo.device_id
+      )
+      setActiveVideoDeviceId(assignment["assigned"]["device_id"])
+    }
+  }, [assignmentsLoading, assignmentsData, activeVideo])
+
   const onPlaybackProgress = progress => {
     if (progress && progress.playedSeconds) {
       setPlaybackTime(
@@ -163,7 +190,10 @@ function Index(props) {
         <Col lg>
           {!loading && activeVideo && (
             <HLSPlayer
+              classroomId={classroomId}
+              videoDate={videoDate}
               streamPath={activeVideo.url}
+              deviceId={activeVideoDeviceId}
               deviceName={activeVideo.device_name}
               controls={true}
               showGeomLayer={true}
@@ -192,6 +222,7 @@ function Index(props) {
                 utcDate={playbackTime}
                 format={TIME_FORMAT}
               />
+              <Form.Control size="lg" type="text" placeholder={playbackTime} />
             </Row>
           </Container>
         </Col>

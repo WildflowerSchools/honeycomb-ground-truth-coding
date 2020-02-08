@@ -1,20 +1,23 @@
-import React, { useEffect, useState, useRef, useCallback } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { ResponsiveEmbed } from "react-bootstrap"
 import GeomLayer from "./geom_layer"
 import ReactPlayer from "react-player"
 import { getURLWithPath as getFullStreamURL } from "../../../../apis/VideoStreamer"
 
-function Index(props) {
+function HLSPlayer(props) {
   const {
     streamPath,
     controls,
     hidden,
     setHidden,
+    classroomId,
+    videoDate,
     showGeomLayer,
     onProgress,
     startPlaybackAt,
     startTime,
+    deviceId,
     deviceName
   } = props
 
@@ -25,9 +28,12 @@ function Index(props) {
 
   const ready = streamPath !== undefined && accessToken !== ""
 
-  const hlsRefSet = useCallback(ref => {
-    setHlsRef(ref)
-  })
+  const hlsRefSet = useCallback(
+    ref => {
+      setHlsRef(ref)
+    },
+    [streamPath]
+  )
 
   useEffect(() => {
     let isMounted = true
@@ -84,6 +90,9 @@ function Index(props) {
                     style={{ pointerEvents: "none" }}
                     getElapsed={hlsRef.getCurrentTime}
                     videoStartTime={startTime}
+                    classroomId={classroomId}
+                    videoDate={videoDate}
+                    deviceId={deviceId}
                     deviceName={deviceName}
                     width={
                       hlsRef
@@ -140,10 +149,10 @@ function Index(props) {
     </>
   )
 }
-Index.defaultProps = {
+HLSPlayer.defaultProps = {
   startPlaybackAt: 0,
   hidden: false,
   showGeomLayer: false
 }
 
-export default Index
+export default HLSPlayer

@@ -6,7 +6,10 @@ import { ApolloLink } from "apollo-link"
 import { HttpLink } from "apollo-link-http"
 import { setContext } from "apollo-link-context"
 import { onError } from "apollo-link-error"
-import { InMemoryCache } from "apollo-cache-inmemory"
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher
+} from "apollo-cache-inmemory"
 
 import { useAuth0 } from "../../react-auth0-spa"
 
@@ -56,9 +59,18 @@ export const HoneycombProvider = ({ children }) => {
   })
 
   const link = ApolloLink.from([errorLink, authLink.concat(httpLink)])
+  const fragmentMatcher = new IntrospectionFragmentMatcher({
+    introspectionQueryResultData: {
+      __schema: {
+        types: []
+      }
+    }
+  })
   const client = new ApolloClient({
     link: link,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache({
+      fragmentMatcher
+    })
   })
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>

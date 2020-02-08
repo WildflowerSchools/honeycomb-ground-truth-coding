@@ -12,6 +12,29 @@ export const GET_ENVIRONMENTS = gql`
   }
 `
 
+export const GET_ENVIRONMENT_ASSIGNMENTS = gql`
+  query getEnvironment($environment_id: ID!) {
+    getEnvironment(environment_id: $environment_id) {
+      environment_id
+      name
+      assignments(current: true) {
+        assignment_id
+        assigned {
+          ... on Device {
+            device_id
+            part_number
+            name
+            tag_id
+            description
+            serial_number
+            mac_address
+          }
+        }
+      }
+    }
+  }
+`
+
 export const GET_MATERIALS = gql`
   query getMaterials {
     materials(page: { sort: { field: "name" } }) {
