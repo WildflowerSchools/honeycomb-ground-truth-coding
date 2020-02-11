@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react"
-import {
-  Container,
-  Col,
-  Form,
-  OverlayTrigger,
-  Row,
-  Tooltip
-} from "react-bootstrap"
+import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useVideoStreamer } from "../../../../apis/VideoStreamer"
@@ -222,7 +215,7 @@ function Index(props) {
                 utcDate={playbackTime}
                 format={TIME_FORMAT}
               />
-              <Form.Control size="lg" type="text" placeholder={playbackTime} />
+              {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
             </Row>
           </Container>
         </Col>
