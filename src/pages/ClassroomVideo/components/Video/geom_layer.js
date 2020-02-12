@@ -80,18 +80,19 @@ function GeomLayer(props) {
         const frameTime = moment.utc(videoStartTime).add(elapsed, "seconds")
         const frameBufferTimeMoment = moment.utc(frameBufferTimeRef.current)
         // console.log(`Current frameTime: ${frameTime}`)
-        // console.log(`Current frameEpochIndex: ${frameEpochIndex}`)
         // console.log(`Buffer time: ${frameBufferTimeMoment}`)
         // console.log(`Diff: ${frameTime.diff(frameBufferTimeMoment, 'seconds')}`)
         if (
           frameTime.diff(frameBufferTimeMoment, "seconds") >=
           frameBufferSeconds - 5
+          ||
+          frameTime.diff(frameBufferTimeMoment, "seconds") < 0
         ) {
           setFrameBufferTime(frameTime)
         }
 
         const epoch = Math.round(frameTime.valueOf() / 100) * 100
-        //console.log(epoch)
+        // console.log(epoch)
         setFrameEpochIndex(epoch)
       }, 1000 / sample.frames_per_second)
     }
