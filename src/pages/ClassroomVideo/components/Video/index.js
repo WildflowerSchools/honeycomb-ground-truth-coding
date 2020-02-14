@@ -1,19 +1,11 @@
-import React, { useEffect, useState, useRef } from "react"
-import {
-  Container,
-  Col,
-  OverlayTrigger,
-  ResponsiveEmbed,
-  Row,
-  Tooltip
-} from "react-bootstrap"
+import React, { useEffect, useState } from "react"
+import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
-import ReactPlayer from "react-player"
 import { useAuth0 } from "../../../../react-auth0-spa"
-import {
-  useVideoStreamer,
-  getURLWithPath as getFullStreamURL
-} from "../../../../apis/VideoStreamer"
+import { useVideoStreamer } from "../../../../apis/VideoStreamer"
+import HLSPlayer from "./hls_player"
+import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
+import { useQuery } from "@apollo/react-hooks"
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
@@ -22,118 +14,6 @@ import { TimezoneText } from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
-
-function usePrevious(value) {
-  const ref = useRef()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
-
-function HLSContainer(props) {
-  const {
-    streamPath,
-    controls,
-    hidden,
-    setHidden,
-    onProgress,
-    startPlaybackAt
-  } = props
-
-  const [accessToken, setAccessToken] = useState("")
-  const [playing, setPlaying] = useState(false)
-  const { getTokenSilently } = useAuth0()
-
-  const ready = streamPath !== undefined && accessToken !== ""
-
-  const hlsRef = useRef()
-
-  useEffect(() => {
-    let isMounted = true
-
-    const getAccessToken = async () => {
-      try {
-        const token = await getTokenSilently()
-        if (isMounted) {
-          setAccessToken(token)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    getAccessToken()
-
-    return () => {
-      isMounted = false
-    }
-  }, [getTokenSilently, setAccessToken, ready])
-
-  const handleOnProgress = progress => {
-    if (onProgress) {
-      onProgress(progress)
-    }
-  }
-
-  const handleOnPause = () => {
-    setPlaying(false)
-  }
-
-  const handleOnPlay = () => {
-    setPlaying(true)
-  }
-
-  const handleOnEnded = () => {
-    setPlaying(false)
-  }
-
-  return (
-    <ResponsiveEmbed
-      className={`hls-container ${props.className}`}
-      aspectRatio="4by3"
-      hidden={hidden}
-    >
-      {ready ? (
-        <div>
-          <ReactPlayer
-            key={`react-player-${streamPath}`}
-            ref={hlsRef}
-            config={{
-              file: {
-                hlsOptions: {
-                  xhrSetup: function(xhr, url) {
-                    xhr.setRequestHeader(
-                      "Authorization",
-                      `Bearer ${accessToken}`
-                    )
-                    // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-                    xhr.addEventListener("loadend", function() {
-                      if (xhr.status === 404) {
-                        setHidden(true)
-                      }
-                    })
-                  },
-                  startPosition: startPlaybackAt
-                }
-              }
-            }}
-            controls={controls}
-            url={getFullStreamURL(streamPath)}
-            pip={false}
-            onProgress={handleOnProgress}
-            onPause={handleOnPause}
-            onPlay={handleOnPlay}
-            onEnded={handleOnEnded}
-            playing={playing}
-          />
-        </div>
-      ) : (
-        <div />
-      )}
-    </ResponsiveEmbed>
-  )
-}
-HLSContainer.defaultProps = { startPlaybackAt: 0 }
 
 function VideoThumbnailsSelection(props) {
   const { videos, onVideoSelected } = props
@@ -147,6 +27,7 @@ function VideoThumbnailsSelection(props) {
   const [activeVideoUrl, setActiveVideoUrl] = useState()
 
   const handleVideoSelected = video => {
+    console.log("Video selected")
     setActiveVideoUrl(video.url)
     onVideoSelected(video)
   }
@@ -195,14 +76,14 @@ function VideoThumbnailsSelection(props) {
                 handleVideoSelected(video)
               }}
             >
-              <HLSContainer
+              <HLSPlayer
                 className={[
                   activeVideoUrl === video.url ? "active" : "inactive",
                   videosHidden[video.url] ? "d-none" : ""
                 ].join(" ")}
                 streamPath={video.url}
                 controls={false}
-                hidden={videosHidden[video.url]}
+                hidden={!!videosHidden[video.url]}
                 setHidden={hidden => {
                   setVideoHidden(video, hidden)
                 }}
@@ -222,7 +103,8 @@ function Index(props) {
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
-  const [activeVideoUrl, setActiveVideoUrl] = useState()
+  const [activeVideo, setActiveVideo] = useState()
+  const [activeVideoDeviceId, setActiveVideoDeviceId] = useState()
   const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
@@ -239,6 +121,13 @@ function Index(props) {
     loading: feedLoading,
     error: feedError
   } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate))
+  const {
+    loading: assignmentsLoading,
+    error: assignmentsError,
+    data: assignmentsData
+  } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS, {
+    variables: { environment_id: classroomId }
+  })
 
   const { loading } = useAuth0()
 
@@ -247,7 +136,7 @@ function Index(props) {
       setVideos(feedData["videos"])
 
       if (feedData["videos"].length > 0) {
-        setActiveVideoUrl(feedData["videos"][0].url)
+        setActiveVideo(feedData["videos"][0])
       }
 
       setStartTime(moment.utc(feedData["start"]))
@@ -266,6 +155,15 @@ function Index(props) {
     }
   }, [listLoading, listData])
 
+  useEffect(() => {
+    if (!assignmentsLoading && assignmentsData && activeVideo) {
+      const assignment = assignmentsData["getEnvironment"]["assignments"].find(
+        a => a["assignment_id"] === activeVideo.device_id
+      )
+      setActiveVideoDeviceId(assignment["assigned"]["device_id"])
+    }
+  }, [assignmentsLoading, assignmentsData, activeVideo])
+
   const onPlaybackProgress = progress => {
     if (progress && progress.playedSeconds) {
       setPlaybackTime(
@@ -276,19 +174,25 @@ function Index(props) {
   }
 
   const onVideoSelected = video => {
-    setActiveVideoUrl(video.url)
+    setActiveVideo(video)
   }
 
   return (
     <Container>
       <Row>
         <Col lg>
-          {!loading && (
-            <HLSContainer
-              streamPath={activeVideoUrl}
+          {!loading && activeVideo && (
+            <HLSPlayer
+              classroomId={classroomId}
+              videoDate={videoDate}
+              streamPath={activeVideo.url}
+              deviceId={activeVideoDeviceId}
+              deviceName={activeVideo.device_name}
               controls={true}
+              showGeomLayer={true}
               onProgress={onPlaybackProgress}
               startPlaybackAt={playbackProgress}
+              startTime={startTime}
             />
           )}
         </Col>
@@ -311,6 +215,7 @@ function Index(props) {
                 utcDate={playbackTime}
                 format={TIME_FORMAT}
               />
+              {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
             </Row>
           </Container>
         </Col>
