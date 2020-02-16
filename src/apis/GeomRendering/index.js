@@ -57,6 +57,8 @@ export const useGeomRenderingSocket = options => {
   }, [isAuthenticated])
 
   const connect = useCallback(() => {
+    if (!HONEYCOMB_GEOM_SOCKET_URI) { return null }
+
     ws = new WebSocket(combineURLs(HONEYCOMB_GEOM_SOCKET_URI, "/ws"))
 
     ws.onopen = () => {
