@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react"
-import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
+import {
+  Button,
+  Container,
+  Col,
+  OverlayTrigger,
+  Row,
+  Tooltip
+} from "react-bootstrap"
 import { useHistory, useLocation } from "react-router-dom"
 import { useQuery } from "@apollo/react-hooks"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faLink } from "@fortawesome/free-solid-svg-icons"
 import queryString from "query-string"
 
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
@@ -20,6 +29,7 @@ import moment from "../../../../utils/moment"
 import "./style.css"
 
 function VideoThumbnailsSelection(props) {
+  // TODO: Stop loading HLS streams, just fetch a single thumbnail image
   const { videos, onVideoSelected } = props
 
   const [videosHidden, setVideosHidden] = useState(
@@ -183,28 +193,6 @@ function VideoPlayer(props) {
   }, [listLoading, listData])
 
   useEffect(() => {
-    if (activeVideo) {
-      const query = queryString.parse(location.search)
-      query.device = activeVideo.device_name
-      history.replace({
-        ...location,
-        search: queryString.stringify(query, { encode: false })
-      })
-    }
-  }, [activeVideo])
-
-  useEffect(() => {
-    if (playbackTime) {
-      const query = queryString.parse(location.search)
-      query.time = moment.utc(playbackTime).format("HH:mm:ss")
-      history.replace({
-        ...location,
-        search: queryString.stringify(query, { encode: false })
-      })
-    }
-  }, [playbackTime])
-
-  useEffect(() => {
     if (!assignmentsLoading && assignmentsData && activeVideo) {
       const assignment = assignmentsData["getEnvironment"]["assignments"].find(
         a => a["assignment_id"] === activeVideo.device_id
@@ -229,6 +217,28 @@ function VideoPlayer(props) {
 
   const onVideoSelected = video => {
     setActiveVideo(video)
+  }
+
+  const copyPageLink = () => {
+    const query = queryString.parse(location.search)
+    if (activeVideo) {
+      query.device = activeVideo.device_name
+    }
+    if (playbackTime) {
+      query.time = moment.utc(playbackTime).format("HH:mm:ss")
+    }
+
+    const pageLink = new URL(window.location)
+    pageLink.search = queryString.stringify(query, { encode: false })
+    const textArea = document.createElement("textarea")
+    textArea.style.position = "absolute"
+    textArea.style.top = "-10000px"
+    textArea.style.left = "-10000px"
+    textArea.value = pageLink.toString()
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand("copy")
+    document.body.removeChild(textArea)
   }
 
   return (
@@ -261,17 +271,34 @@ function VideoPlayer(props) {
             includeDates={availableDates.map(d => moment(d).toDate())}
           />
         </Col>
-        <Col className="justify-content-end">
-          <Container>
-            <Row className="justify-content-end">
+        <Col>
+          <Row className="justify-content-end align-items-center h-100">
+            <Col className="col-auto">
               <TimezoneText
                 as="h5"
+                className="mb-0"
                 utcDate={playbackTime}
                 format={TIME_FORMAT}
               />
-              {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
-            </Row>
-          </Container>
+            </Col>
+            <Col className="col-auto pl-0">
+              {/*<textarea id="copy-link-text" style={{position: 'absolute', left: '-10000px', top: '-10000px'}}></textarea>*/}
+              <OverlayTrigger
+                placement="top"
+                delay={{ hide: 200 }}
+                overlay={
+                  <Tooltip id={"copy-link-tooltip"}>Link Copied!</Tooltip>
+                }
+                rootClose={true}
+                trigger="click"
+              >
+                <Button variant="light" size="sm" onClick={copyPageLink}>
+                  <FontAwesomeIcon icon={faLink} />
+                </Button>
+              </OverlayTrigger>
+            </Col>
+            {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
+          </Row>
         </Col>
       </Row>
       <hr />

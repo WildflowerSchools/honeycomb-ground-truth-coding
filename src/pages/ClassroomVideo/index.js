@@ -42,7 +42,7 @@ function Index(props) {
           >
             <InteractionForm />
           </div>
-          <InteractionList classroomId={classroomId} videoDate={videoDate} />
+          {/*<InteractionList classroomId={classroomId} videoDate={videoDate} />*/}
         </Col>
       </Row>
     </Container>

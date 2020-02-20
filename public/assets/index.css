@@ -15,8 +15,7 @@ body {
 
 #overlord::after {
   content: "";
-  background-image: url(./HeroImage.jpg);
-  opacity: 0.2;
+  background-color: #efefef;
   top: 0;
   left: 0;
   bottom: 0;

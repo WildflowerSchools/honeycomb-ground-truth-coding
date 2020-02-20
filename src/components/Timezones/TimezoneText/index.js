@@ -3,14 +3,14 @@ import React from "react"
 import { useSettings } from "../../../settings"
 import moment from "../../../utils/moment"
 
-function Index(props) {
+function TimezoneText(props) {
   const { timezone } = useSettings()
 
-  const Wrapper = props.as || "div"
+  const Wrapper = props.as || "React.Fragment"
   const { utcDate, format, ...otherProps } = props
 
   if (!utcDate) {
-    return <div>loading...</div>
+    return <Wrapper {...otherProps}>loading...</Wrapper>
   }
 
   return (
@@ -22,4 +22,4 @@ function Index(props) {
   )
 }
 
-export default Index
+export default TimezoneText
