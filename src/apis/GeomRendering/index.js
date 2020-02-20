@@ -57,7 +57,9 @@ export const useGeomRenderingSocket = options => {
   }, [isAuthenticated])
 
   const connect = useCallback(() => {
-    if (!HONEYCOMB_GEOM_SOCKET_URI) { return null }
+    if (!HONEYCOMB_GEOM_SOCKET_URI) {
+      return null
+    }
 
     ws = new WebSocket(combineURLs(HONEYCOMB_GEOM_SOCKET_URI, "/ws"))
 
@@ -190,13 +192,17 @@ export const useGeomRenderingSocket = options => {
     sendMessage("getGeoms", { environment_id: environmentId, date: date })
   }, [])
 
-  const requestCoordinates = useCallback((sampleId, deviceId, from) => {
-    sendMessage("getCoordinates", {
-      sample_id: sampleId,
-      device_id: deviceId,
-      from: from
-    })
-  }, [])
+  const requestCoordinates = useCallback(
+    (sampleId, deviceId, from, seconds) => {
+      sendMessage("getCoordinates", {
+        sample_id: sampleId,
+        device_id: deviceId,
+        from: from,
+        seconds: seconds
+      })
+    },
+    []
+  )
 
   return [requestGeoms, requestCoordinates]
 }

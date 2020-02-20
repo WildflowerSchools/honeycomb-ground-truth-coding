@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import { Text, Layer, Rect, Stage } from "react-konva"
+import { Layer, Line, Rect, Stage, Text } from "react-konva"
 
 import moment from "../../../../utils/moment"
 
@@ -26,9 +26,9 @@ function GeomLayer(props) {
     ...otherProps
   } = props
 
-  const frameBufferSeconds = 25
+  const frameBufferSeconds = 15
 
-  const [frameBufferTime, setFrameBufferTime] = useState(null)
+  const [frameBufferTime, setFrameBufferTime] = useState(videoStartTime)
   const frameBufferTimeRef = useRef(frameBufferTime)
   const [frameEpochIndex, setFrameEpochIndex] = useState(0)
   const [sample, setSample] = useState({})
@@ -68,9 +68,7 @@ function GeomLayer(props) {
   useEffect(() => {
     let interval = null
 
-    if (sample.start_time) {
-      setFrameBufferTime(sample.start_time)
-
+    if (sample) {
       interval = setInterval(() => {
         const elapsed = getElapsed()
         if (!elapsed) {
@@ -84,11 +82,10 @@ function GeomLayer(props) {
         // console.log(`Diff: ${frameTime.diff(frameBufferTimeMoment, 'seconds')}`)
         if (
           frameTime.diff(frameBufferTimeMoment, "seconds") >=
-          frameBufferSeconds - 5
-          ||
+            frameBufferSeconds - 5 ||
           frameTime.diff(frameBufferTimeMoment, "seconds") < 0
         ) {
-          setFrameBufferTime(frameTime)
+          setFrameBufferTime(frameTime.format())
         }
 
         const epoch = Math.round(frameTime.valueOf() / 100) * 100
@@ -111,7 +108,12 @@ function GeomLayer(props) {
       Object.entries(sample).length > 0 &&
       sample.constructor === Object
     ) {
-      requestCoordinates(sample.id, deviceId, frameBufferTime)
+      requestCoordinates(
+        sample.id,
+        deviceId,
+        frameBufferTime,
+        frameBufferSeconds
+      )
     }
   }, [frameBufferTime, sample, deviceId])
 
@@ -130,7 +132,7 @@ function GeomLayer(props) {
         {geoms &&
           geoms
             .map(geom => {
-              const [x, y] = (() => {
+              const [x, y, points] = (() => {
                 if (
                   frameEpochIndex === 0 ||
                   !coordinates.hasOwnProperty(geom.id) ||
@@ -141,9 +143,13 @@ function GeomLayer(props) {
 
                 const geom_coordinates =
                   coordinates[geom.id][frameEpochIndex].coordinates
+                const projected_coordinates = geom_coordinates.map(point =>
+                  projectCoordinate(point)
+                )
                 return [
-                  projectCoordinate(geom_coordinates[0]),
-                  projectCoordinate(geom_coordinates[1])
+                  projected_coordinates[0],
+                  projected_coordinates[1],
+                  projected_coordinates
                 ]
               })()
 
@@ -158,7 +164,7 @@ function GeomLayer(props) {
                       y={y}
                       width={5}
                       height={5}
-                      visible={x !== null && y !== null}
+                      visible={x !== null || y !== null}
                       // ref={node => {
                       //   addGeomRef(node)
                       // }}
@@ -175,7 +181,22 @@ function GeomLayer(props) {
                       fill={geom.attributes.color}
                       x={x}
                       y={y}
-                      visible={x !== null && y !== null}
+                      visible={x !== null || y !== null}
+                      // ref={node => {
+                      //   addGeomRef(node)
+                      // }}
+                    />
+                  )
+                case "Line2D":
+                  return (
+                    <Line
+                      id={geom.id}
+                      key={`geom-${geom.id}`}
+                      points={points}
+                      fill={geom.attributes.color}
+                      stroke={geom.attributes.color}
+                      visible={x !== null || y !== null}
+                      strokeWidth={geom.attributes.line_width || 1}
                       // ref={node => {
                       //   addGeomRef(node)
                       // }}

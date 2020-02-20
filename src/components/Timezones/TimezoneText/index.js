@@ -1,6 +1,7 @@
 import React from "react"
 
 import { useSettings } from "../../../settings"
+import moment from "../../../utils/moment"
 
 function Index(props) {
   const { timezone } = useSettings()
@@ -13,7 +14,11 @@ function Index(props) {
   }
 
   return (
-    <Wrapper {...otherProps}>{utcDate.tz(timezone).format(format)}</Wrapper>
+    <Wrapper {...otherProps}>
+      {moment(utcDate)
+        .tz(timezone)
+        .format(format)}
+    </Wrapper>
   )
 }
 

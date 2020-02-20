@@ -8,8 +8,11 @@ services:
       dockerfile: Dockerfile-dev
     volumes:
       - '.:/app'
-      - '/app/node_modules'
+      - node-modules:/app/node_modules
     ports:
       - '3000:3000'
     environment:
       - NODE_ENV=development
+
+volumes:
+  node-modules:

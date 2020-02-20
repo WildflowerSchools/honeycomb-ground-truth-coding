@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react"
 import { Container, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
+import { useHistory, useLocation } from "react-router-dom"
+import { useQuery } from "@apollo/react-hooks"
+import queryString from "query-string"
+
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useVideoStreamer } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
 import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
-import { useQuery } from "@apollo/react-hooks"
+
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
@@ -24,10 +28,9 @@ function VideoThumbnailsSelection(props) {
       return acc
     }, {})
   )
-  const [activeVideoUrl, setActiveVideoUrl] = useState()
+  const [activeVideoUrl, setActiveVideoUrl] = useState(props.activeVideoUrl)
 
   const handleVideoSelected = video => {
-    console.log("Video selected")
     setActiveVideoUrl(video.url)
     onVideoSelected(video)
   }
@@ -96,8 +99,11 @@ function VideoThumbnailsSelection(props) {
   )
 }
 
-function Index(props) {
-  const classroomId = props.classroomId
+function VideoPlayer(props) {
+  const { classroomId, deviceName, videoTime } = props
+
+  const history = useHistory()
+  const location = useLocation()
 
   const TIME_FORMAT = "h:mm:ss A z"
 
@@ -108,7 +114,7 @@ function Index(props) {
   const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
-  const [playbackTime, setPlaybackTime] = useState(moment())
+  const [playbackTime, setPlaybackTime] = useState(null)
   const [playbackProgress, setPlaybackProgress] = useState(0)
 
   const {
@@ -136,12 +142,33 @@ function Index(props) {
       setVideos(feedData["videos"])
 
       if (feedData["videos"].length > 0) {
-        setActiveVideo(feedData["videos"][0])
+        const vIndex = (() => {
+          if (deviceName) {
+            const potentialIndex = feedData["videos"].findIndex(video => {
+              return video.device_name === deviceName
+            })
+            return potentialIndex !== -1 ? potentialIndex : 0
+          } else {
+            return 0
+          }
+        })()
+
+        setActiveVideo(feedData["videos"][vIndex])
       }
 
-      setStartTime(moment.utc(feedData["start"]))
-      setEndTime(moment.utc(feedData["end"]))
-      setPlaybackTime(moment.utc(feedData["start"]))
+      setStartTime(moment.utc(feedData["start"]).format())
+      setEndTime(moment.utc(feedData["end"]).format())
+      if (videoTime) {
+        const pbt = moment.utc(`${videoDate}T${videoTime}`)
+        setPlaybackTime(pbt.format())
+
+        const pbt_diff = pbt.diff(moment.utc(feedData["start"]), "seconds")
+        if (pbt_diff > 0) {
+          setPlaybackProgress(pbt_diff)
+        }
+      } else {
+        setPlaybackTime(moment.utc(feedData["start"]).format())
+      }
     }
   }, [feedLoading, feedData])
 
@@ -156,6 +183,28 @@ function Index(props) {
   }, [listLoading, listData])
 
   useEffect(() => {
+    if (activeVideo) {
+      const query = queryString.parse(location.search)
+      query.device = activeVideo.device_name
+      history.replace({
+        ...location,
+        search: queryString.stringify(query, { encode: false })
+      })
+    }
+  }, [activeVideo])
+
+  useEffect(() => {
+    if (playbackTime) {
+      const query = queryString.parse(location.search)
+      query.time = moment.utc(playbackTime).format("HH:mm:ss")
+      history.replace({
+        ...location,
+        search: queryString.stringify(query, { encode: false })
+      })
+    }
+  }, [playbackTime])
+
+  useEffect(() => {
     if (!assignmentsLoading && assignmentsData && activeVideo) {
       const assignment = assignmentsData["getEnvironment"]["assignments"].find(
         a => a["assignment_id"] === activeVideo.device_id
@@ -167,7 +216,12 @@ function Index(props) {
   const onPlaybackProgress = progress => {
     if (progress && progress.playedSeconds) {
       setPlaybackTime(
-        moment(startTime.clone().add(progress.playedSeconds, "seconds"))
+        // moment(moment.utc(startTime).clone().add(progress.playedSeconds, "seconds"))
+        moment
+          .utc(startTime)
+          .clone()
+          .add(progress.playedSeconds, "seconds")
+          .format()
       )
       setPlaybackProgress(progress.playedSeconds)
     }
@@ -221,14 +275,15 @@ function Index(props) {
         </Col>
       </Row>
       <hr />
-      {!loading && (
+      {!loading && activeVideo && (
         <VideoThumbnailsSelection
           videos={videos}
           onVideoSelected={onVideoSelected}
+          activeVideoUrl={activeVideo.url}
         />
       )}
     </Container>
   )
 }
 
-export default Index
+export default VideoPlayer
