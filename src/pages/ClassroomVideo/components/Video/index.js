@@ -95,6 +95,7 @@ function VideoThumbnailsSelection(props) {
                   videosHidden[video.url] ? "d-none" : ""
                 ].join(" ")}
                 streamPath={video.url}
+                previewPath={video.preview_thumbnail_url}
                 controls={false}
                 hidden={!!videosHidden[video.url]}
                 setHidden={hidden => {

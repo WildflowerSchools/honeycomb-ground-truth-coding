@@ -8,6 +8,7 @@ import { getURLWithPath as getFullStreamURL } from "../../../../apis/VideoStream
 function HLSPlayer(props) {
   const {
     streamPath,
+    previewPath,
     controls,
     hidden,
     setHidden,
@@ -109,37 +110,46 @@ function HLSPlayer(props) {
                   />
                 </>
               )}
-              <ReactPlayer
-                key={`react-player-${streamPath}`}
-                ref={hlsRefSet}
-                config={{
-                  file: {
-                    hlsOptions: {
-                      xhrSetup: function(xhr, url) {
-                        xhr.setRequestHeader(
-                          "Authorization",
-                          `Bearer ${accessToken}`
-                        )
-                        // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-                        xhr.addEventListener("loadend", function() {
-                          if (xhr.status === 404) {
-                            setHidden(true)
-                          }
-                        })
-                      },
-                      startPosition: startPlaybackAt
+              {previewPath && (
+                <img
+                  src={getFullStreamURL(previewPath)}
+                  onError={() => setHidden(true)}
+                  style={{ width: "inherit", height: "inherit" }}
+                />
+              )}
+              {!previewPath && (
+                <ReactPlayer
+                  key={`react-player-${streamPath}`}
+                  ref={hlsRefSet}
+                  config={{
+                    file: {
+                      hlsOptions: {
+                        xhrSetup: function(xhr, url) {
+                          xhr.setRequestHeader(
+                            "Authorization",
+                            `Bearer ${accessToken}`
+                          )
+                          // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
+                          xhr.addEventListener("loadend", function() {
+                            if (xhr.status === 404) {
+                              setHidden(true)
+                            }
+                          })
+                        },
+                        startPosition: startPlaybackAt
+                      }
                     }
-                  }
-                }}
-                controls={controls}
-                url={getFullStreamURL(streamPath)}
-                pip={false}
-                onProgress={handleOnProgress}
-                onPause={handleOnPause}
-                onPlay={handleOnPlay}
-                onEnded={handleOnEnded}
-                playing={playing}
-              />
+                  }}
+                  controls={controls}
+                  url={getFullStreamURL(streamPath)}
+                  pip={false}
+                  onProgress={handleOnProgress}
+                  onPause={handleOnPause}
+                  onPlay={handleOnPlay}
+                  onEnded={handleOnEnded}
+                  playing={playing}
+                />
+              )}
             </div>
           </ResponsiveEmbed>
         </>
