@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useContext } from "react"
+import { useCookies } from "react-cookie"
 import createAuth0Client from "@auth0/auth0-spa-js"
 
 const DEFAULT_REDIRECT_CALLBACK = () =>
   window.history.replaceState({}, document.title, window.location.pathname)
+
+const JWT_COOKIE_NAME = "wf.jwt"
 
 export const Auth0Context = React.createContext()
 export const useAuth0 = () => useContext(Auth0Context)
@@ -17,12 +20,17 @@ export const Auth0Provider = ({
   const [loading, setLoading] = useState(true)
   const [popupOpen, setPopupOpen] = useState(false)
 
+  const [, setCookie, removeCookie] = useCookies([JWT_COOKIE_NAME])
+
   useEffect(() => {
     const initAuth0 = async () => {
       const auth0FromHook = await createAuth0Client(initOptions)
       setAuth0(auth0FromHook)
 
-      if (window.location.search.includes("code=")) {
+      if (
+        window.location.search.includes("code=") &&
+        window.location.search.includes("state=")
+      ) {
         const { appState } = await auth0FromHook.handleRedirectCallback()
         onRedirectCallback(appState)
       }
@@ -41,6 +49,26 @@ export const Auth0Provider = ({
     initAuth0()
     // eslint-disable-next-line
   }, [])
+
+  useEffect(() => {
+    const updateJWTCookie = async () => {
+      if (isAuthenticated) {
+        const token = await auth0Client.getTokenSilently()
+        const domain = `${window.location.hostname
+          .split(".")
+          .slice(-2)
+          .join(".")}`
+        setCookie(JWT_COOKIE_NAME, token, {
+          secure: true,
+          domain: domain,
+          path: "/"
+        })
+      } else {
+        removeCookie(JWT_COOKIE_NAME)
+      }
+    }
+    updateJWTCookie()
+  }, [isAuthenticated])
 
   const loginWithPopup = async (params = {}) => {
     setPopupOpen(true)
