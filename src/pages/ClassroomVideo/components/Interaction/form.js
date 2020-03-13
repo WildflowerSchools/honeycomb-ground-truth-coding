@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 
-import useForm from "react-hook-form"
+import { useForm } from "react-hook-form"
 import DatePicker from "react-datepicker"
 import PropTypes from "prop-types"
 import { Button, Container, Form, Row } from "react-bootstrap"

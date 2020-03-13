@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom"
 import App from "./App"
 import history from "./utils/history"
 import { HoneycombProvider } from "./apis/Honeycomb"
+import { IconContext } from "react-icons"
 import { SettingsProvider } from "./settings"
 
 import "react-datepicker/dist/react-datepicker.css"
@@ -45,7 +46,9 @@ ReactDOM.render(
     <BrowserRouter>
       <SettingsProvider>
         <HoneycombProvider>
-          <App />
+          <IconContext.Provider value={{ style: { verticalAlign: "middle" } }}>
+            <App />
+          </IconContext.Provider>
         </HoneycombProvider>
       </SettingsProvider>
     </BrowserRouter>

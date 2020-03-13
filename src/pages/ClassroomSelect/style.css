@@ -2,7 +2,7 @@
     min-width: 200px;
     text-align: center;
 }
-.classroom-input button {
+.classroom-input button.btn {
     min-width: 200px;
 }
 .classroom-input .dropdown-menu {

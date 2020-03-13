@@ -1,11 +1,18 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  forwardRef,
+  useRef,
+  useImperativeHandle
+} from "react"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { ResponsiveEmbed } from "react-bootstrap"
 import GeomLayer from "./geom_layer"
 import ReactPlayer from "react-player"
 import { getURLWithPath as getFullStreamURL } from "../../../../apis/VideoStreamer"
 
-function HLSPlayer(props) {
+const HLSPlayer = forwardRef((props, ref) => {
   const {
     streamPath,
     previewPath,
@@ -21,6 +28,14 @@ function HLSPlayer(props) {
     deviceId,
     deviceName
   } = props
+
+  useImperativeHandle(ref, () => ({
+    getHlsRef() {
+      return hlsRef
+    },
+    playing: playing,
+    setPlaying: setPlaying
+  }))
 
   const [accessToken, setAccessToken] = useState("")
   const [playing, setPlaying] = useState(false)
@@ -74,6 +89,28 @@ function HLSPlayer(props) {
     setPlaying(false)
   }
 
+  const styles = {
+    geomLayerPointerEvent: { pointerEvents: "none" },
+    previewImgSizing: { width: "inherit", height: "inherit" }
+  }
+
+  const reactPlayerConfig = {
+    file: {
+      hlsOptions: {
+        xhrSetup: function(xhr, url) {
+          xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
+          // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
+          xhr.addEventListener("loadend", function() {
+            if (xhr.status === 404) {
+              setHidden(true)
+            }
+          })
+        },
+        startPosition: startPlaybackAt
+      }
+    }
+  }
+
   return (
     <>
       {ready ? (
@@ -88,7 +125,7 @@ function HLSPlayer(props) {
                 <>
                   <GeomLayer
                     className={`geom-layer`}
-                    style={{ pointerEvents: "none" }}
+                    style={styles.geomLayerPointerEvent}
                     getElapsed={hlsRef.getCurrentTime}
                     videoStartTime={startTime}
                     classroomId={classroomId}
@@ -114,41 +151,26 @@ function HLSPlayer(props) {
                 <img
                   src={getFullStreamURL(previewPath)}
                   onError={() => setHidden(true)}
-                  style={{ width: "inherit", height: "inherit" }}
+                  style={styles.previewImgSizing}
                 />
               )}
               {!previewPath && (
-                <ReactPlayer
-                  key={`react-player-${streamPath}`}
-                  ref={hlsRefSet}
-                  config={{
-                    file: {
-                      hlsOptions: {
-                        xhrSetup: function(xhr, url) {
-                          xhr.setRequestHeader(
-                            "Authorization",
-                            `Bearer ${accessToken}`
-                          )
-                          // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-                          xhr.addEventListener("loadend", function() {
-                            if (xhr.status === 404) {
-                              setHidden(true)
-                            }
-                          })
-                        },
-                        startPosition: startPlaybackAt
-                      }
-                    }
-                  }}
-                  controls={controls}
-                  url={getFullStreamURL(streamPath)}
-                  pip={false}
-                  onProgress={handleOnProgress}
-                  onPause={handleOnPause}
-                  onPlay={handleOnPlay}
-                  onEnded={handleOnEnded}
-                  playing={playing}
-                />
+                <>
+                  <ReactPlayer
+                    key={`react-player-${streamPath}`}
+                    ref={hlsRefSet}
+                    config={reactPlayerConfig}
+                    controls={controls}
+                    url={getFullStreamURL(streamPath)}
+                    pip={false}
+                    onProgress={handleOnProgress}
+                    progressInterval={100}
+                    onPause={handleOnPause}
+                    onPlay={handleOnPlay}
+                    onEnded={handleOnEnded}
+                    playing={playing}
+                  />
+                </>
               )}
             </div>
           </ResponsiveEmbed>
@@ -158,7 +180,7 @@ function HLSPlayer(props) {
       )}
     </>
   )
-}
+})
 HLSPlayer.defaultProps = {
   startPlaybackAt: 0,
   hidden: false,
