@@ -1,25 +1,11 @@
 import React, { useState } from "react"
-import {
-  Button,
-  Card,
-  Container,
-  Dropdown,
-  DropdownButton,
-  Row,
-  Table
-} from "react-bootstrap"
+import { Card, Dropdown, DropdownButton, Table } from "react-bootstrap"
 
 import Modal from "./modal"
 
 import "./list.css"
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  faEye,
-  faPen,
-  faToolbox,
-  faTrash
-} from "@fortawesome/free-solid-svg-icons"
+import { FaEye, FaPen, FaTrash } from "react-icons/fa"
 
 function Index(props) {
   const [showModal, setShowModal] = useState(false)
@@ -59,7 +45,7 @@ function Index(props) {
               <DropdownButton
                 size="sm"
                 variant="secondary"
-                title={<FontAwesomeIcon icon={faEye} />}
+                title={<FaEye />}
                 className="caret-off"
               >
                 <Dropdown.Item
@@ -67,14 +53,14 @@ function Index(props) {
                     console.log("edit")
                   }}
                 >
-                  <FontAwesomeIcon icon={faPen} />
+                  <FaPen />
                 </Dropdown.Item>
                 <Dropdown.Item
                   onClick={() => {
                     console.log("delete")
                   }}
                 >
-                  <FontAwesomeIcon icon={faTrash} />
+                  <FaTrash />
                 </Dropdown.Item>
               </DropdownButton>
             </td>

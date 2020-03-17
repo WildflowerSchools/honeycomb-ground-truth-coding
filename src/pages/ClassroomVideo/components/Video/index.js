@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
   Button,
   Container,
@@ -7,116 +7,40 @@ import {
   Row,
   Tooltip
 } from "react-bootstrap"
-import { useHistory, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useQuery } from "@apollo/react-hooks"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faLink } from "@fortawesome/free-solid-svg-icons"
+import { FaLink } from "react-icons/fa"
 import queryString from "query-string"
 
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { useVideoStreamer } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
+import HLSPlayerControls from "./hls_player_controls"
+import VideoSelect from "./video_select"
 import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
 
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
 } from "../../../../apis/VideoStreamer/queries"
-import { TimezoneText } from "../../../../components/Timezones"
+import {
+  TimezoneText,
+  TimezoneEditable
+} from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
-
-function VideoThumbnailsSelection(props) {
-  // TODO: Stop loading HLS streams, just fetch a single thumbnail image
-  const { videos, onVideoSelected } = props
-
-  const [videosHidden, setVideosHidden] = useState(
-    videos.reduce((acc, video) => {
-      acc[video.url] = false
-      return acc
-    }, {})
-  )
-  const [activeVideoUrl, setActiveVideoUrl] = useState(props.activeVideoUrl)
-
-  const handleVideoSelected = video => {
-    setActiveVideoUrl(video.url)
-    onVideoSelected(video)
-  }
-
-  useEffect(() => {
-    setVideosHidden(
-      videos.reduce((acc, video) => {
-        acc[video.url] = false
-        return acc
-      }, {})
-    )
-    if (!activeVideoUrl && videos && videos.length) {
-      setActiveVideoUrl(videos[0].url)
-    }
-  }, [videos])
-
-  const setVideoHidden = (video, hidden) => {
-    setVideosHidden(prev => Object.assign({}, prev, { [video.url]: hidden }))
-  }
-
-  return (
-    <Row style={{ marginTop: "20px" }} noGutters={true}>
-      {videos.map((video, ii) => {
-        return (
-          <OverlayTrigger
-            key={`hls-container-overlay-${ii}`}
-            className={videosHidden[video.url] ? "d-none" : ""}
-            placement={"top"}
-            overlay={
-              <Tooltip id={`hls-container-tooltip-${ii}`}>
-                Camera: <strong>{video.device_name}</strong>.
-              </Tooltip>
-            }
-          >
-            <Col
-              className={[
-                "hls-thumbnails",
-                videosHidden[video.url] ? "d-none" : ""
-              ].join(" ")}
-              xs={4}
-              md={3}
-              lg={2}
-              key={ii}
-              style={{ paddingTop: "10px" }}
-              onClick={() => {
-                handleVideoSelected(video)
-              }}
-            >
-              <HLSPlayer
-                className={[
-                  activeVideoUrl === video.url ? "active" : "inactive",
-                  videosHidden[video.url] ? "d-none" : ""
-                ].join(" ")}
-                streamPath={video.url}
-                previewPath={video.preview_thumbnail_url}
-                controls={false}
-                hidden={!!videosHidden[video.url]}
-                setHidden={hidden => {
-                  setVideoHidden(video, hidden)
-                }}
-              />
-            </Col>
-          </OverlayTrigger>
-        )
-      })}
-    </Row>
-  )
-}
+import { useSettings } from "../../../../settings"
 
 function VideoPlayer(props) {
   const { classroomId, deviceName, videoTime } = props
 
-  const history = useHistory()
   const location = useLocation()
 
-  const TIME_FORMAT = "h:mm:ss A z"
+  const TIME_FORMAT = "h:mm:ss.S A z"
+
+  const { timezone } = useSettings()
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
@@ -127,26 +51,29 @@ function VideoPlayer(props) {
   const [endTime, setEndTime] = useState()
   const [playbackTime, setPlaybackTime] = useState(null)
   const [playbackProgress, setPlaybackProgress] = useState(0)
+  const [editTimeZone, setEditTimezone] = useState(false)
 
   const {
     loading: listLoading,
-    error: listError,
-    data: listData
-  } = useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId))
+    data: listData,
+    error: listError
+  } = useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId)) //useMemo(() => useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId)), [classroomId])
   const {
     data: feedData,
     loading: feedLoading,
     error: feedError
-  } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate))
+  } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate)) //useMemo( () => useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate)), [classroomId, videoDate])
   const {
     loading: assignmentsLoading,
-    error: assignmentsError,
-    data: assignmentsData
+    data: assignmentsData,
+    error: assignmentsError
   } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS, {
     variables: { environment_id: classroomId }
   })
 
   const { loading } = useAuth0()
+
+  const hlsPlayerRef = useRef()
 
   useEffect(() => {
     if (feedLoading === false && feedData) {
@@ -171,14 +98,14 @@ function VideoPlayer(props) {
       setEndTime(moment.utc(feedData["end"]).format())
       if (videoTime) {
         const pbt = moment.utc(`${videoDate}T${videoTime}`)
-        setPlaybackTime(pbt.format())
+        setPlaybackTime(pbt.valueOf())
 
         const pbt_diff = pbt.diff(moment.utc(feedData["start"]), "seconds")
         if (pbt_diff > 0) {
           setPlaybackProgress(pbt_diff)
         }
       } else {
-        setPlaybackTime(moment.utc(feedData["start"]).format())
+        setPlaybackTime(moment.utc(feedData["start"]).valueOf())
       }
     }
   }, [feedLoading, feedData])
@@ -203,14 +130,13 @@ function VideoPlayer(props) {
   }, [assignmentsLoading, assignmentsData, activeVideo])
 
   const onPlaybackProgress = progress => {
-    if (progress && progress.playedSeconds) {
+    if (progress && progress.hasOwnProperty("playedSeconds")) {
       setPlaybackTime(
-        // moment(moment.utc(startTime).clone().add(progress.playedSeconds, "seconds"))
         moment
           .utc(startTime)
           .clone()
           .add(progress.playedSeconds, "seconds")
-          .format()
+          .valueOf()
       )
       setPlaybackProgress(progress.playedSeconds)
     }
@@ -242,12 +168,37 @@ function VideoPlayer(props) {
     document.body.removeChild(textArea)
   }
 
+  const handleEditTimeZone = () => {
+    setEditTimezone(true)
+  }
+
+  const seekTo = newEpoch => {
+    if (!newEpoch) {
+      return
+    }
+
+    const pbt = moment.utc(newEpoch)
+    setPlaybackTime(pbt.valueOf())
+
+    if (hlsPlayerRef.current) {
+      const pbt_diff = pbt.diff(moment.utc(feedData["start"])) / 1000
+      hlsPlayerRef.current.getHlsRef().seekTo(pbt_diff, "seconds")
+    }
+  }
+
+  const styles = {
+    controlsRowMT: { marginTop: "20px" },
+    controlsRowFontSize: { fontSize: "1.4em" },
+    controlsColumnMt: { borderRight: "1px solid black" },
+    copyOverlayHideDuration: { hide: 200 }
+  }
   return (
     <Container>
       <Row>
-        <Col lg>
+        <Col sm>
           {!loading && activeVideo && (
             <HLSPlayer
+              ref={hlsPlayerRef}
               classroomId={classroomId}
               videoDate={videoDate}
               streamPath={activeVideo.url}
@@ -262,31 +213,41 @@ function VideoPlayer(props) {
           )}
         </Col>
       </Row>
-      <Row className="justify-content-between" style={{ marginTop: "20px" }}>
-        <Col>
-          <ButtonDatePicker
-            placeholderText="Select Date..."
-            selected={moment(videoDate).toDate()}
-            onChange={d => setVideoDate(moment(d).format("YYYY-MM-DD"))}
-            dateFormat="MMM dd, yyyy"
-            includeDates={availableDates.map(d => moment(d).toDate())}
-          />
-        </Col>
-        <Col>
-          <Row className="justify-content-end align-items-center h-100">
+      <Row className="align-items-center h-100" style={styles.controlsRowMT}>
+        <Col
+          sm={9}
+          className="d-flex justify-content-between align-items-center h-100"
+          style={styles.controlsRowFontSize}
+        >
+          <Row className="justify-content-start align-items-center h-100">
+            <Col className="col-auto" style={styles.controlsColumnMt}>
+              <HLSPlayerControls hlsPlayerRef={hlsPlayerRef} />
+            </Col>
             <Col className="col-auto">
-              <TimezoneText
-                as="h5"
-                className="mb-0"
-                utcDate={playbackTime}
-                format={TIME_FORMAT}
-              />
+              {editTimeZone === false ? (
+                <TimezoneText
+                  as="h5"
+                  className="mb-0"
+                  epoch={playbackTime}
+                  format={TIME_FORMAT}
+                  onClick={handleEditTimeZone}
+                />
+              ) : (
+                <TimezoneEditable
+                  onSubmit={seekTo}
+                  onBlur={() => {
+                    setEditTimezone(false)
+                  }}
+                  epoch={playbackTime}
+                  format={TIME_FORMAT}
+                  timezone={timezone}
+                />
+              )}
             </Col>
             <Col className="col-auto pl-0">
-              {/*<textarea id="copy-link-text" style={{position: 'absolute', left: '-10000px', top: '-10000px'}}></textarea>*/}
               <OverlayTrigger
                 placement="top"
-                delay={{ hide: 200 }}
+                delay={styles.copyOverlayHideDuration}
                 overlay={
                   <Tooltip id={"copy-link-tooltip"}>Link Copied!</Tooltip>
                 }
@@ -294,17 +255,27 @@ function VideoPlayer(props) {
                 trigger="click"
               >
                 <Button variant="light" size="sm" onClick={copyPageLink}>
-                  <FontAwesomeIcon icon={faLink} />
+                  <FaLink />
                 </Button>
               </OverlayTrigger>
             </Col>
-            {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
           </Row>
+        </Col>
+        <Col sm={3}>
+          <div className="float-right">
+            <ButtonDatePicker
+              placeholderText="Select Date..."
+              selected={moment(videoDate).toDate()}
+              onChange={d => setVideoDate(moment(d).format("YYYY-MM-DD"))}
+              dateFormat="MMM dd, yyyy"
+              includeDates={availableDates.map(d => moment(d).toDate())}
+            />
+          </div>
         </Col>
       </Row>
       <hr />
       {!loading && activeVideo && (
-        <VideoThumbnailsSelection
+        <VideoSelect
           videos={videos}
           onVideoSelected={onVideoSelected}
           activeVideoUrl={activeVideo.url}

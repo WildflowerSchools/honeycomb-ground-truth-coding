@@ -1,4 +1,4 @@
 import TimezoneDropdown from "./TimezoneDropdown"
-import TimezoneText from "./TimezoneText"
+import { TimezoneText, TimezoneEditable } from "./TimezoneText"
 
-export { TimezoneDropdown, TimezoneText }
+export { TimezoneDropdown, TimezoneText, TimezoneEditable }
