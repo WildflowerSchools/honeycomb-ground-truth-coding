@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
   Button,
   Container,
@@ -24,10 +24,14 @@ import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS
 } from "../../../../apis/VideoStreamer/queries"
-import { TimezoneText } from "../../../../components/Timezones"
+import {
+  TimezoneText,
+  TimezoneEditable
+} from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
 import "./style.css"
+import { useSettings } from "../../../../settings"
 
 function VideoPlayer(props) {
   const { classroomId, deviceName, videoTime } = props
@@ -35,6 +39,8 @@ function VideoPlayer(props) {
   const location = useLocation()
 
   const TIME_FORMAT = "h:mm:ss.S A z"
+
+  const { timezone } = useSettings()
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
@@ -45,6 +51,7 @@ function VideoPlayer(props) {
   const [endTime, setEndTime] = useState()
   const [playbackTime, setPlaybackTime] = useState(null)
   const [playbackProgress, setPlaybackProgress] = useState(0)
+  const [editTimeZone, setEditTimezone] = useState(false)
 
   const {
     loading: listLoading,
@@ -161,6 +168,24 @@ function VideoPlayer(props) {
     document.body.removeChild(textArea)
   }
 
+  const handleEditTimeZone = () => {
+    setEditTimezone(true)
+  }
+
+  const seekTo = newEpoch => {
+    if (!newEpoch) {
+      return
+    }
+
+    const pbt = moment.utc(newEpoch)
+    setPlaybackTime(pbt.valueOf())
+
+    if (hlsPlayerRef.current) {
+      const pbt_diff = pbt.diff(moment.utc(feedData["start"])) / 1000
+      hlsPlayerRef.current.getHlsRef().seekTo(pbt_diff, "seconds")
+    }
+  }
+
   const styles = {
     controlsRowMT: { marginTop: "20px" },
     controlsRowFontSize: { fontSize: "1.4em" },
@@ -199,12 +224,25 @@ function VideoPlayer(props) {
               <HLSPlayerControls hlsPlayerRef={hlsPlayerRef} />
             </Col>
             <Col className="col-auto">
-              <TimezoneText
-                as="h5"
-                className="mb-0"
-                utcDate={playbackTime}
-                format={TIME_FORMAT}
-              />
+              {editTimeZone === false ? (
+                <TimezoneText
+                  as="h5"
+                  className="mb-0"
+                  epoch={playbackTime}
+                  format={TIME_FORMAT}
+                  onClick={handleEditTimeZone}
+                />
+              ) : (
+                <TimezoneEditable
+                  onSubmit={seekTo}
+                  onBlur={() => {
+                    setEditTimezone(false)
+                  }}
+                  epoch={playbackTime}
+                  format={TIME_FORMAT}
+                  timezone={timezone}
+                />
+              )}
             </Col>
             <Col className="col-auto pl-0">
               <OverlayTrigger
@@ -221,7 +259,6 @@ function VideoPlayer(props) {
                 </Button>
               </OverlayTrigger>
             </Col>
-            {/*<Form.Control size="lg" type="text" placeholder={playbackTime} />*/}
           </Row>
         </Col>
         <Col sm={3}>
