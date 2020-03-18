@@ -57,7 +57,7 @@ function HLSPlayerControls(props) {
 
   return (
     <ButtonGroup aria-label="Toolbar with video navigation buttons" {...other}>
-      {hlsPlayerRef && hlsPlayerRef.current && (
+      {hlsPlayerRef && hlsPlayerRef.current && hlsPlayerRef.current.getHlsRef() && (
         <>
           <HLSPlayerButton
             disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() < 10}

@@ -12,7 +12,7 @@
     "apollo-link-context": "^1.0.19",
     "apollo-link-error": "^1.1.12",
     "apollo-link-http": "^1.5.16",
-    "aws-sdk": "^2.640.0",
+    "aws-sdk": "^2.641.0",
     "axios": "^0.19.2",
     "axios-hooks": "^1.9.0",
     "date-fns": "^2.11.0",
