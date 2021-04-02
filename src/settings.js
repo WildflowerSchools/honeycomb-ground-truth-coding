@@ -9,7 +9,7 @@ export const useSettings = () => useContext(SettingsContext)
 export const SettingsProvider = ({ children }) => {
   const [timezone, _setTimezone] = useLocalStorage("timezone", LOCAL_TIMEZONE)
 
-  const setTimezone = value => {
+  const setTimezone = (value) => {
     if (!value) {
       _setTimezone(LOCAL_TIMEZONE)
     } else {
@@ -21,7 +21,7 @@ export const SettingsProvider = ({ children }) => {
     <SettingsContext.Provider
       value={{
         timezone,
-        setTimezone
+        setTimezone,
       }}
     >
       {children}

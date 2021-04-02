@@ -9,12 +9,12 @@ import {
   GET_MATERIALS,
   GET_STUDENTS,
   GET_INTERACTION_ENUMS,
-  GET_CONCENTRATION_ENUMS
+  GET_CONCENTRATION_ENUMS,
 } from "../../../../apis/Honeycomb/queries"
 import {
   observationCodeToValue,
   engagementTypeToValue,
-  concentrationOverallLevelToValue
+  concentrationOverallLevelToValue,
 } from "../../../../apis/Honeycomb/scalars"
 import { useQuery } from "@apollo/react-hooks"
 
@@ -28,7 +28,7 @@ function Index(props) {
     register({ name: "startTime" }, { required: true })
   }, [])
 
-  const onSubmit = values => {
+  const onSubmit = (values) => {
     console.log(values)
   }
 
@@ -41,25 +41,25 @@ function Index(props) {
   const {
     loading: materialsLoading,
     error: materialsError,
-    data: materialsData
+    data: materialsData,
   } = useQuery(GET_MATERIALS)
 
   const {
     loading: studentsLoading,
     error: studentsError,
-    data: studentsData
+    data: studentsData,
   } = useQuery(GET_STUDENTS)
 
   const {
     loading: interactionEnumsLoading,
     error: interactionEnumsError,
-    data: interactionEnumsData
+    data: interactionEnumsData,
   } = useQuery(GET_INTERACTION_ENUMS)
 
   const {
     loading: concentrationEnumsLoading,
     error: concentrationEnumsError,
-    data: concentrationEnumsData
+    data: concentrationEnumsData,
   } = useQuery(GET_CONCENTRATION_ENUMS)
 
   if (
@@ -90,7 +90,7 @@ function Index(props) {
           ref={register({ required: true })}
         >
           <option key="person_null" />
-          {studentsData.students.data.map(person => (
+          {studentsData.students.data.map((person) => (
             <option key={person.person_id}>{person.name}</option>
           ))}
         </Form.Control>
@@ -103,7 +103,7 @@ function Index(props) {
           ref={register({ required: true })}
         >
           <option key="material_null" />
-          {materialsData.materials.data.map(material => (
+          {materialsData.materials.data.map((material) => (
             <option key={material.material_id}>{material.name}</option>
           ))}
         </Form.Control>
@@ -114,7 +114,7 @@ function Index(props) {
           <DatePicker
             className="form-control"
             selected={interaction.startTime}
-            onChange={val => {
+            onChange={(val) => {
               setInteraction({ ...interaction, startTime: val })
               setValue("startTime", val)
             }}
@@ -132,7 +132,7 @@ function Index(props) {
           <DatePicker
             className="form-control"
             selected={interaction.endTime}
-            onChange={val => {
+            onChange={(val) => {
               setInteraction({ ...interaction, endTime: val })
               setValue("endTime", val)
             }}
@@ -152,7 +152,7 @@ function Index(props) {
           ref={register({ required: true })}
         >
           <option key="code_null" />
-          {interactionEnumsData.enumObservationCodes.enumValues.map(code => (
+          {interactionEnumsData.enumObservationCodes.enumValues.map((code) => (
             <option key={code.name}>{observationCodeToValue(code.name)}</option>
           ))}
         </Form.Control>
@@ -166,7 +166,7 @@ function Index(props) {
         >
           <option key="concentartion_null" />
           {concentrationEnumsData.enumConcentrationOverallLevels.enumValues.map(
-            concentration => (
+            (concentration) => (
               <option key={concentration.name}>
                 {concentrationOverallLevelToValue(concentration.name)}
               </option>
@@ -183,7 +183,7 @@ function Index(props) {
         >
           <option key="engagement_null" />
           {interactionEnumsData.enumEngagementTypes.enumValues.map(
-            engagement => (
+            (engagement) => (
               <option key={engagement.name}>
                 {engagementTypeToValue(engagement.name)}
               </option>
@@ -206,11 +206,11 @@ function Index(props) {
 }
 
 Index.defaultProps = {
-  interaction: {}
+  interaction: {},
 }
 
 Index.propTypes = {
-  interaction: PropTypes.object
+  interaction: PropTypes.object,
 }
 
 export default Index

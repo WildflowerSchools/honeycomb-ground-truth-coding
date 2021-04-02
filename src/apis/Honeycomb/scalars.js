@@ -1,4 +1,4 @@
-export const observationCodeToValue = enum_id => {
+export const observationCodeToValue = (enum_id) => {
   switch (enum_id.toUpperCase()) {
     case "IC":
       return "Independent Choice"
@@ -13,7 +13,7 @@ export const observationCodeToValue = enum_id => {
   }
 }
 
-export const engagementTypeToValue = enum_id => {
+export const engagementTypeToValue = (enum_id) => {
   switch (enum_id.toUpperCase()) {
     case "W":
       return "Working"
@@ -38,7 +38,7 @@ export const engagementTypeToValue = enum_id => {
   }
 }
 
-export const concentrationOverallLevelToValue = enum_id => {
+export const concentrationOverallLevelToValue = (enum_id) => {
   switch (enum_id.toUpperCase()) {
     case "DEEP_CONCENTRATION":
       return "Deep Concentration"
@@ -59,7 +59,7 @@ export const concentrationOverallLevelToValue = enum_id => {
   }
 }
 
-export const concentrationLevelToValue = enum_id => {
+export const concentrationLevelToValue = (enum_id) => {
   switch (enum_id.toUpperCase()) {
     case "COMPLETELY":
       return "Completely"

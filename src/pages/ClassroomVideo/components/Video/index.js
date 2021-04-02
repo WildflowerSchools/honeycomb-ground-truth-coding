@@ -5,16 +5,19 @@ import {
   Col,
   OverlayTrigger,
   Row,
-  Tooltip
+  Tooltip,
 } from "react-bootstrap"
 import { useLocation } from "react-router-dom"
 import { useQuery } from "@apollo/react-hooks"
-import { FaLink } from "react-icons/fa"
+import { FaLink, FaDownload } from "react-icons/fa"
 import queryString from "query-string"
 
 import ButtonDatePicker from "../../../../components/ButtonDatePicker"
 import { useAuth0 } from "../../../../react-auth0-spa"
-import { useVideoStreamer } from "../../../../apis/VideoStreamer"
+import {
+  useVideoStreamer,
+  getVideoThumbnail,
+} from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
 import HLSPlayerControls from "./hls_player_controls"
 import VideoSelect from "./video_select"
@@ -22,11 +25,12 @@ import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
 
 import {
   GET_CLASSROOM_VIDEO_FEED,
-  LIST_CLASSROOM_VIDEOS
+  LIST_CLASSROOM_VIDEOS,
+  GET_CLASSROOM_VIDEO_PREVIEW_IMAGE,
 } from "../../../../apis/VideoStreamer/queries"
 import {
   TimezoneText,
-  TimezoneEditable
+  TimezoneEditable,
 } from "../../../../components/Timezones"
 import moment from "../../../../utils/moment"
 
@@ -34,7 +38,14 @@ import "./style.css"
 import { useSettings } from "../../../../settings"
 
 function VideoPlayer(props) {
-  const { classroomId, deviceName, videoTime } = props
+  const {
+    classroomId,
+    deviceName,
+    videoTime,
+    setVideos,
+    activeVideo,
+    setActiveVideo,
+  } = props
 
   const location = useLocation()
 
@@ -44,9 +55,9 @@ function VideoPlayer(props) {
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
-  const [activeVideo, setActiveVideo] = useState()
+  // const [activeVideo, setActiveVideo] = useState()
   const [activeVideoDeviceId, setActiveVideoDeviceId] = useState()
-  const [videos, setVideos] = useState([])
+  // const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
   const [playbackTime, setPlaybackTime] = useState(null)
@@ -56,33 +67,47 @@ function VideoPlayer(props) {
   const {
     loading: listLoading,
     data: listData,
-    error: listError
+    error: listError,
   } = useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId)) //useMemo(() => useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId)), [classroomId])
   const {
     data: feedData,
     loading: feedLoading,
-    error: feedError
+    error: feedError,
   } = useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate)) //useMemo( () => useVideoStreamer(GET_CLASSROOM_VIDEO_FEED(classroomId, videoDate)), [classroomId, videoDate])
   const {
     loading: assignmentsLoading,
     data: assignmentsData,
-    error: assignmentsError
+    error: assignmentsError,
   } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS, {
-    variables: { environment_id: classroomId }
+    variables: { environment_id: classroomId },
   })
 
-  const { loading } = useAuth0()
+  const { loading, getTokenSilently } = useAuth0()
 
   const hlsPlayerRef = useRef()
 
-  useEffect(() => {
+  useEffect(async () => {
     if (feedLoading === false && feedData) {
       setVideos(feedData["videos"])
+
+      const token = await getTokenSilently()
+      feedData["videos"] = await Promise.all(
+        feedData["videos"].map(async (video, ii) => {
+          video["preview_thumbnail_data"] = await getVideoThumbnail(
+            {
+              url: video.preview_thumbnail_url,
+              method: "GET",
+            },
+            token
+          )
+          return video
+        })
+      )
 
       if (feedData["videos"].length > 0) {
         const vIndex = (() => {
           if (deviceName) {
-            const potentialIndex = feedData["videos"].findIndex(video => {
+            const potentialIndex = feedData["videos"].findIndex((video) => {
               return video.device_name === deviceName
             })
             return potentialIndex !== -1 ? potentialIndex : 0
@@ -113,7 +138,7 @@ function VideoPlayer(props) {
   useEffect(() => {
     if (!listLoading && listData) {
       setAvailableDates(
-        listData.dates.map(data => {
+        listData.dates.map((data) => {
           return data.date
         })
       )
@@ -123,13 +148,13 @@ function VideoPlayer(props) {
   useEffect(() => {
     if (!assignmentsLoading && assignmentsData && activeVideo) {
       const assignment = assignmentsData["getEnvironment"]["assignments"].find(
-        a => a["assignment_id"] === activeVideo.device_id
+        (a) => a["assignment_id"] === activeVideo.device_id
       )
       setActiveVideoDeviceId(assignment["assigned"]["device_id"])
     }
   }, [assignmentsLoading, assignmentsData, activeVideo])
 
-  const onPlaybackProgress = progress => {
+  const onPlaybackProgress = (progress) => {
     if (progress && progress.hasOwnProperty("playedSeconds")) {
       setPlaybackTime(
         moment
@@ -142,9 +167,9 @@ function VideoPlayer(props) {
     }
   }
 
-  const onVideoSelected = video => {
-    setActiveVideo(video)
-  }
+  // const onVideoSelected = (video) => {
+  //   setActiveVideo(video)
+  // }
 
   const copyPageLink = () => {
     const query = queryString.parse(location.search)
@@ -168,11 +193,26 @@ function VideoPlayer(props) {
     document.body.removeChild(textArea)
   }
 
+  const downloadSnapshot = () => {
+    const download = document.getElementById("download")
+    const video = document.querySelector("video")
+    const scale = 1.0
+
+    const canvas = document.createElement("canvas")
+    canvas.width = video.videoWidth * scale
+    canvas.height = video.videoHeight * scale
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height)
+    const img = canvas
+      .toDataURL("image/png")
+      .replace("image/png", "image/octet-stream")
+    download.setAttribute("href", img)
+  }
+
   const handleEditTimeZone = () => {
     setEditTimezone(true)
   }
 
-  const seekTo = newEpoch => {
+  const seekTo = (newEpoch) => {
     if (!newEpoch) {
       return
     }
@@ -190,7 +230,7 @@ function VideoPlayer(props) {
     controlsRowMT: { marginTop: "20px" },
     controlsRowFontSize: { fontSize: "1.4em" },
     controlsColumnMt: { borderRight: "1px solid black" },
-    copyOverlayHideDuration: { hide: 200 }
+    copyOverlayHideDuration: { hide: 200 },
   }
   return (
     <Container>
@@ -215,7 +255,7 @@ function VideoPlayer(props) {
       </Row>
       <Row className="align-items-center h-100" style={styles.controlsRowMT}>
         <Col
-          sm={9}
+          sm={10}
           className="d-flex justify-content-between align-items-center h-100"
           style={styles.controlsRowFontSize}
         >
@@ -259,28 +299,35 @@ function VideoPlayer(props) {
                 </Button>
               </OverlayTrigger>
             </Col>
+            <Col className="col-auto pl-0">
+              <a id="download" download="snapshot.png">
+                <Button variant="light" size="sm" onClick={downloadSnapshot}>
+                  <FaDownload />
+                </Button>
+              </a>
+            </Col>
           </Row>
         </Col>
-        <Col sm={3}>
+        <Col sm={2}>
           <div className="float-right">
             <ButtonDatePicker
               placeholderText="Select Date..."
               selected={moment(videoDate).toDate()}
-              onChange={d => setVideoDate(moment(d).format("YYYY-MM-DD"))}
+              onChange={(d) => setVideoDate(moment(d).format("YYYY-MM-DD"))}
               dateFormat="MMM dd, yyyy"
-              includeDates={availableDates.map(d => moment(d).toDate())}
+              includeDates={availableDates.map((d) => moment(d).toDate())}
             />
           </div>
         </Col>
       </Row>
       <hr />
-      {!loading && activeVideo && (
-        <VideoSelect
-          videos={videos}
-          onVideoSelected={onVideoSelected}
-          activeVideoUrl={activeVideo.url}
-        />
-      )}
+      {/*{!loading && activeVideo && (*/}
+      {/*  <VideoSelect*/}
+      {/*    videos={videos}*/}
+      {/*    onVideoSelected={onVideoSelected}*/}
+      {/*    activeVideoUrl={activeVideo.url}*/}
+      {/*  />*/}
+      {/*)}*/}
     </Container>
   )
 }

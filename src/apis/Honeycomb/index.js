@@ -8,7 +8,7 @@ import { setContext } from "apollo-link-context"
 import { onError } from "apollo-link-error"
 import {
   InMemoryCache,
-  IntrospectionFragmentMatcher
+  IntrospectionFragmentMatcher,
 } from "apollo-cache-inmemory"
 
 import { useAuth0 } from "../../react-auth0-spa"
@@ -23,7 +23,7 @@ export const HoneycombProvider = ({ children }) => {
   }
 
   const httpLink = new HttpLink({
-    uri: HONEYCOMB_BASE_URL
+    uri: HONEYCOMB_BASE_URL,
   })
 
   const authLink = setContext(async (_, { headers }) => {
@@ -32,14 +32,14 @@ export const HoneycombProvider = ({ children }) => {
       return {
         headers: {
           ...headers,
-          authorization: `Bearer ${token}`
-        }
+          authorization: `Bearer ${token}`,
+        },
       }
     } else {
       return {
         headers: {
-          ...headers
-        }
+          ...headers,
+        },
       }
     }
   })
@@ -62,15 +62,15 @@ export const HoneycombProvider = ({ children }) => {
   const fragmentMatcher = new IntrospectionFragmentMatcher({
     introspectionQueryResultData: {
       __schema: {
-        types: []
-      }
-    }
+        types: [],
+      },
+    },
   })
   const client = new ApolloClient({
     link: link,
     cache: new InMemoryCache({
-      fragmentMatcher
-    })
+      fragmentMatcher,
+    }),
   })
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>

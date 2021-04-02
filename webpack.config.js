@@ -2,7 +2,7 @@ const path = require('path');
 const package = require('./package.json');
 const DefinePlugin = require('webpack').DefinePlugin;
 const TerserPlugin = require('terser-webpack-plugin');
-const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
+//const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const fs = require('fs')
@@ -61,6 +61,9 @@ module.exports = (env, options) => {
       ]
     },
     plugins: [
+      // new webpack.ProvidePlugin({
+      //   process: 'process/browser',
+      // }),
       new DefinePlugin({
         'process.env.HONEYCOMB_URI': JSON.stringify(process.env.HONEYCOMB_URI),
         'process.env.HONEYCOMB_VIDEO_STREAM_URI': JSON.stringify(process.env.HONEYCOMB_VIDEO_STREAM_URI),
@@ -68,28 +71,35 @@ module.exports = (env, options) => {
         'process.env.AUTH0_CLIENT_ID': JSON.stringify(process.env.AUTH0_CLIENT_ID),
         'process.env.AUTH0_DOMAIN': JSON.stringify(process.env.AUTH0_DOMAIN),
         'process.env.AUTH0_CALLBACK': JSON.stringify(process.env.AUTH0_CALLBACK),
-        'process.env.HONEYCOMB_AUDIENCE': JSON.stringify(process.env.HONEYCOMB_AUDIENCE)
+        'process.env.HONEYCOMB_AUDIENCE': JSON.stringify(process.env.HONEYCOMB_AUDIENCE),
+        'process.platform': JSON.stringify(process.platform),
+        'process.browser': JSON.stringify(process.browser),
       }),
-      new ErrorOverlayPlugin(),
+      //new ErrorOverlayPlugin(),
       new HtmlWebpackPlugin({
+        chunks: ['app'],
         template: path.join(__dirname, 'public', 'index.html'),
         inject: false,
         filename: path.join(__dirname, 'build', 'index.html'),
       }),
       ...(build ?
-        [new CopyWebpackPlugin([
-          {from: path.join(__dirname, 'public', 'assets'), to: 'assets' }
-        ])] : [])
+        [new CopyWebpackPlugin(
+          {
+            patterns: [
+              {from: path.join(__dirname, 'public', 'assets'), to: 'assets'}
+            ]
+          }
+        )] : [])
     ],
     optimization: {
       minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            compress: true,
-            mangle: true,
-            output: {comments: false}
-          }
-        })
+        // new TerserPlugin({
+        //   terserOptions: {
+        //     compress: true,
+        //     mangle: true,
+        //     output: {comments: false}
+        //   }
+        // })
       ]
     }
   };

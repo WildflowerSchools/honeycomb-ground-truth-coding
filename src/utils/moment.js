@@ -196,10 +196,10 @@ const abbrs = {
   "WIT+0700": "Western Indonesian Time",
   "WST+0800": "Western Standard Time",
   "YAKT+0900": "Yakutsk Time",
-  "YEKT+0500": "Yekaterinburg Time"
+  "YEKT+0500": "Yekaterinburg Time",
 }
 
-moment.fn.zoneName = function() {
+moment.fn.zoneName = function () {
   const abbr = `${this.zoneAbbr()}${this.format("ZZ")}`
   return abbrs[abbr] || this.zoneAbbr()
 }

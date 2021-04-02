@@ -6,16 +6,11 @@ import moment from "../../../utils/moment"
 import { Form } from "react-bootstrap"
 
 const epochAsString = (epoch, timezone, format) => {
-  return moment(epoch)
-    .tz(timezone)
-    .format(format)
-    .toString()
+  return moment(epoch).tz(timezone).format(format).toString()
 }
 
 const dateAsEpoch = (date, timezone, format) => {
-  return moment(date, format)
-    .tz(timezone)
-    .valueOf()
+  return moment(date, format).tz(timezone).valueOf()
 }
 
 function TimezoneEditable(props) {
@@ -24,13 +19,13 @@ function TimezoneEditable(props) {
     epoch,
     timezone,
     onBlur = () => {},
-    onSubmit = () => {}
+    onSubmit = () => {},
   } = props
 
   const defaultTime = epochAsString(epoch, timezone, format)
   const inputRef = useRef(null)
 
-  const handleOnSubmit = event => {
+  const handleOnSubmit = (event) => {
     event.preventDefault()
     event.stopPropagation()
 
@@ -55,7 +50,7 @@ function TimezoneEditable(props) {
     inputRef.current.blur()
   }
 
-  const handleOnKeyUp = event => {
+  const handleOnKeyUp = (event) => {
     if (event.keyCode === 27) {
       event.preventDefault()
       event.stopPropagation()
@@ -63,7 +58,7 @@ function TimezoneEditable(props) {
     }
   }
 
-  const handleOnBlur = event => {
+  const handleOnBlur = (event) => {
     onBlur(event)
   }
 
@@ -100,9 +95,7 @@ function TimezoneText(props) {
 
   return (
     <Wrapper {...otherProps}>
-      {moment(epoch)
-        .tz(timezone)
-        .format(format)}
+      {moment(epoch).tz(timezone).format(format)}
     </Wrapper>
   )
 }

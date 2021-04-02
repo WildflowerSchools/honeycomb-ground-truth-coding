@@ -4,7 +4,7 @@ import React, {
   useState,
   forwardRef,
   useRef,
-  useImperativeHandle
+  useImperativeHandle,
 } from "react"
 import { useAuth0 } from "../../../../react-auth0-spa"
 import { ResponsiveEmbed } from "react-bootstrap"
@@ -16,6 +16,7 @@ const HLSPlayer = forwardRef((props, ref) => {
   const {
     streamPath,
     previewPath,
+    previewData,
     controls,
     hidden,
     setHidden,
@@ -26,7 +27,7 @@ const HLSPlayer = forwardRef((props, ref) => {
     startPlaybackAt,
     startTime,
     deviceId,
-    deviceName
+    deviceName,
   } = props
 
   useImperativeHandle(ref, () => ({
@@ -34,7 +35,7 @@ const HLSPlayer = forwardRef((props, ref) => {
       return hlsRef
     },
     playing: playing,
-    setPlaying: setPlaying
+    setPlaying: setPlaying,
   }))
 
   const [accessToken, setAccessToken] = useState("")
@@ -45,7 +46,7 @@ const HLSPlayer = forwardRef((props, ref) => {
   const ready = streamPath !== undefined && accessToken !== ""
 
   const hlsRefSet = useCallback(
-    ref => {
+    (ref) => {
       setHlsRef(ref)
     },
     [streamPath]
@@ -71,7 +72,7 @@ const HLSPlayer = forwardRef((props, ref) => {
     }
   }, [getTokenSilently, setAccessToken, ready])
 
-  const handleOnProgress = progress => {
+  const handleOnProgress = (progress) => {
     if (onProgress) {
       onProgress(progress)
     }
@@ -91,24 +92,24 @@ const HLSPlayer = forwardRef((props, ref) => {
 
   const styles = {
     geomLayerPointerEvent: { pointerEvents: "none" },
-    previewImgSizing: { width: "inherit", height: "inherit" }
+    previewImgSizing: { width: "inherit", height: "inherit" },
   }
 
   const reactPlayerConfig = {
     file: {
       hlsOptions: {
-        xhrSetup: function(xhr, url) {
+        xhrSetup: function (xhr, url) {
           xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
           // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
-          xhr.addEventListener("loadend", function() {
+          xhr.addEventListener("loadend", function () {
             if (xhr.status === 404) {
               setHidden(true)
             }
           })
         },
-        startPosition: startPlaybackAt
-      }
-    }
+        startPosition: startPlaybackAt,
+      },
+    },
   }
 
   return (
@@ -133,24 +134,22 @@ const HLSPlayer = forwardRef((props, ref) => {
                     deviceId={deviceId}
                     deviceName={deviceName}
                     width={
-                      hlsRef
-                        ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
-                            .width
-                        : 0
+                      hlsRef ? hlsRef.wrapper.getBoundingClientRect().width : 0
                     }
                     height={
-                      hlsRef
-                        ? hlsRef.wrapper.firstElementChild.getBoundingClientRect()
-                            .height
-                        : 0
+                      hlsRef ? hlsRef.wrapper.getBoundingClientRect().height : 0
                     }
                   />
                 </>
               )}
-              {previewPath && (
+              {previewData && (
                 <img
-                  src={getFullStreamURL(previewPath)}
-                  onError={() => setHidden(true)}
+                  // src={getFullStreamURL(previewPath)}
+                  src={previewData}
+                  onError={(err) => {
+                    console.log(err)
+                    setHidden(true)
+                  }}
                   style={styles.previewImgSizing}
                 />
               )}
@@ -184,7 +183,7 @@ const HLSPlayer = forwardRef((props, ref) => {
 HLSPlayer.defaultProps = {
   startPlaybackAt: 0,
   hidden: false,
-  showGeomLayer: false
+  showGeomLayer: false,
 }
 
 export default HLSPlayer

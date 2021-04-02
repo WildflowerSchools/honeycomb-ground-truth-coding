@@ -11,7 +11,9 @@
   <body>
     <div id="overlord" class="container">
       <div id="root"></div>
-      <script async src="<%= htmlWebpackPlugin.files.chunks['app'].entry %>"></script>
+      <% for (index in htmlWebpackPlugin.files.js) { %>
+          <script async src="<%= htmlWebpackPlugin.files.js[index] %>"></script>
+      <% } %>
     </div>
   </body>
 </html>

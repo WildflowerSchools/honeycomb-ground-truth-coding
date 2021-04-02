@@ -8,7 +8,7 @@ import { MdForward30, MdReplay10 } from "react-icons/md"
 function HLSPlayerButton(props) {
   const { children, tooltip, ...other } = props
   const buttonStyle = {
-    fontSize: "18px"
+    fontSize: "18px",
   }
 
   const delay = { show: 250, hide: 250 }
@@ -27,12 +27,12 @@ function HLSPlayerButton(props) {
 function HLSPlayerControls(props) {
   const { hlsPlayerRef, ...other } = props
 
-  const handleOnRewind = seconds => {
+  const handleOnRewind = (seconds) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime - seconds, "seconds")
   }
 
-  const handleOnFastForward = seconds => {
+  const handleOnFastForward = (seconds) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime + seconds, "seconds")
   }
@@ -57,63 +57,65 @@ function HLSPlayerControls(props) {
 
   return (
     <ButtonGroup aria-label="Toolbar with video navigation buttons" {...other}>
-      {hlsPlayerRef && hlsPlayerRef.current && hlsPlayerRef.current.getHlsRef() && (
-        <>
-          <HLSPlayerButton
-            disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() < 10}
-            tooltip="Rewind 10 seconds"
-            onClick={() => {
-              handleOnRewind(10)
-            }}
-            variant="light"
-          >
-            <MdReplay10 />
-          </HLSPlayerButton>
-          <HLSPlayerButton
-            disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() <= 0}
-            tooltip="Step back 1 frame"
-            onClick={handleOnStepBackward}
-            variant="light"
-          >
-            <FaStepBackward />
-          </HLSPlayerButton>
-
-          {hlsPlayerRef.current.playing === false ? (
+      {hlsPlayerRef &&
+        hlsPlayerRef.current &&
+        hlsPlayerRef.current.getHlsRef() && (
+          <>
             <HLSPlayerButton
-              tooltip="Play"
-              onClick={handleOnPlay}
+              disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() < 10}
+              tooltip="Rewind 10 seconds"
+              onClick={() => {
+                handleOnRewind(10)
+              }}
               variant="light"
             >
-              <FaPlay />
+              <MdReplay10 />
             </HLSPlayerButton>
-          ) : (
             <HLSPlayerButton
-              tooltip="Pause"
-              onClick={handleOnPause}
+              disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() <= 0}
+              tooltip="Step back 1 frame"
+              onClick={handleOnStepBackward}
               variant="light"
             >
-              <FaPause />
+              <FaStepBackward />
             </HLSPlayerButton>
-          )}
 
-          <HLSPlayerButton
-            tooltip="Step forward 1 frame"
-            onClick={handleOnStepForward}
-            variant="light"
-          >
-            <FaStepForward />
-          </HLSPlayerButton>
-          <HLSPlayerButton
-            tooltip="Fast-forward 30 seconds"
-            onClick={() => {
-              handleOnFastForward(30)
-            }}
-            variant="light"
-          >
-            <MdForward30 />
-          </HLSPlayerButton>
-        </>
-      )}
+            {hlsPlayerRef.current.playing === false ? (
+              <HLSPlayerButton
+                tooltip="Play"
+                onClick={handleOnPlay}
+                variant="light"
+              >
+                <FaPlay />
+              </HLSPlayerButton>
+            ) : (
+              <HLSPlayerButton
+                tooltip="Pause"
+                onClick={handleOnPause}
+                variant="light"
+              >
+                <FaPause />
+              </HLSPlayerButton>
+            )}
+
+            <HLSPlayerButton
+              tooltip="Step forward 1 frame"
+              onClick={handleOnStepForward}
+              variant="light"
+            >
+              <FaStepForward />
+            </HLSPlayerButton>
+            <HLSPlayerButton
+              tooltip="Fast-forward 30 seconds"
+              onClick={() => {
+                handleOnFastForward(30)
+              }}
+              variant="light"
+            >
+              <MdForward30 />
+            </HLSPlayerButton>
+          </>
+        )}
     </ButtonGroup>
   )
 }

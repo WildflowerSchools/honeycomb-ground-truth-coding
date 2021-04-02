@@ -15,7 +15,7 @@ import "react-bootstrap-timezone-picker/dist/react-bootstrap-timezone-picker.min
 
 // import * as serviceWorker from './serviceWorker'
 
-const onRedirectCallback = appState => {
+const onRedirectCallback = (appState) => {
   history.push(
     appState && appState.targetUrl
       ? appState.targetUrl
@@ -30,7 +30,7 @@ const authConfig = {
   clientId: process.env.AUTH0_CLIENT_ID || "jDm6KBz3czRMo5MGI6KcVTmvtUXxzmnE",
   domain: process.env.AUTH0_DOMAIN || "wildflowerschools.auth0.com",
   responseType: "token id_token",
-  scope: "openid profile video:view"
+  scope: "openid profile video:view",
 }
 
 ReactDOM.render(

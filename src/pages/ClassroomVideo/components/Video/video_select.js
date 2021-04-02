@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
 import { Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import HLSPlayer from "./hls_player"
+import { useVideoStreamer } from "../../../../apis/VideoStreamer"
+import { GET_CLASSROOM_VIDEO_FEED } from "../../../../apis/VideoStreamer/queries"
 
-const VideoSelect = React.memo(props => {
+const VideoSelect = React.memo((props) => {
   const { videos = [], onVideoSelected = () => {} } = props
 
   const [videosHidden, setVideosHidden] = useState(
@@ -13,7 +15,7 @@ const VideoSelect = React.memo(props => {
   )
   const [activeVideoUrl, setActiveVideoUrl] = useState(null)
 
-  const handleVideoSelected = video => {
+  const handleVideoSelected = (video) => {
     setActiveVideoUrl(video.url)
     onVideoSelected(video)
   }
@@ -25,18 +27,19 @@ const VideoSelect = React.memo(props => {
         return acc
       }, {})
     )
+
     if (!activeVideoUrl && videos && videos.length) {
       setActiveVideoUrl(videos[0].url)
     }
   }, [videos])
 
   const setVideoHidden = (video, hidden) => {
-    setVideosHidden(prev => Object.assign({}, prev, { [video.url]: hidden }))
+    setVideosHidden((prev) => Object.assign({}, prev, { [video.url]: hidden }))
   }
 
   const styles = {
     rowMainMT: { marginTop: "20px" },
-    thumbnailsPT: { paddingTop: "10px" }
+    thumbnailsPT: { paddingTop: "0px" },
   }
 
   return (
@@ -56,11 +59,11 @@ const VideoSelect = React.memo(props => {
             <Col
               className={[
                 "hls-thumbnails",
-                videosHidden[video.url] ? "d-none" : ""
+                videosHidden[video.url] ? "d-none" : "",
               ].join(" ")}
               xs={4}
-              md={3}
-              lg={2}
+              md={4}
+              lg={4}
               key={ii}
               style={styles.thumbnailsPT}
               onClick={() => {
@@ -70,13 +73,14 @@ const VideoSelect = React.memo(props => {
               <HLSPlayer
                 className={[
                   activeVideoUrl === video.url ? "active" : "inactive",
-                  videosHidden[video.url] ? "d-none" : ""
+                  videosHidden[video.url] ? "d-none" : "",
                 ].join(" ")}
                 streamPath={video.url}
                 previewPath={video.preview_thumbnail_url}
+                previewData={video.preview_thumbnail_data || null}
                 controls={false}
                 hidden={!!videosHidden[video.url]}
-                setHidden={hidden => {
+                setHidden={(hidden) => {
                   setVideoHidden(video, hidden)
                 }}
               />

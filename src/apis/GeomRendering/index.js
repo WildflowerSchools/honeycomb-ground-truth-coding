@@ -7,7 +7,7 @@ const HONEYCOMB_GEOM_SOCKET_URI = process.env.HONEYCOMB_GEOM_SOCKET_URI
 
 let ws
 
-export const useGeomRenderingSocket = options => {
+export const useGeomRenderingSocket = (options) => {
   const { onGeoms, onCoordinates } = options
 
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -78,7 +78,7 @@ export const useGeomRenderingSocket = options => {
       heartbeat()
     }
 
-    ws.onclose = e => {
+    ws.onclose = (e) => {
       if (!allowRefresh) {
         return
       }
@@ -95,7 +95,7 @@ export const useGeomRenderingSocket = options => {
     }
 
     // websocket onerror event listener
-    ws.onerror = err => {
+    ws.onerror = (err) => {
       console.error(
         "Geom Socket encountered error: ",
         err.message,
@@ -105,7 +105,7 @@ export const useGeomRenderingSocket = options => {
       ws.close()
     }
 
-    ws.onmessage = event => {
+    ws.onmessage = (event) => {
       const parsedEvt = JSON.parse(event.data)
 
       console.log(`Geom Socket Received Message: ${parsedEvt.event}`)
@@ -157,7 +157,7 @@ export const useGeomRenderingSocket = options => {
 
     const msg = JSON.stringify({
       event: eventName,
-      data: data
+      data: data,
     })
     ws.send(msg)
     console.log(`Sent Message over Geom Socket: ${eventName}`)
@@ -198,7 +198,7 @@ export const useGeomRenderingSocket = options => {
         sample_id: sampleId,
         device_id: deviceId,
         from: from,
-        seconds: seconds
+        seconds: seconds,
       })
     },
     []

@@ -8,7 +8,7 @@ function Index(props) {
 
   const logoutWithRedirect = () =>
     logout({
-      returnTo: window.location.origin
+      returnTo: window.location.origin,
     })
 
   return (

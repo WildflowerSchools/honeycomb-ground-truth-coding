@@ -35,7 +35,7 @@ function GeomLayer(props) {
   const [geoms, setGeoms] = useState([])
   const [coordinates, setCoordinates] = useState({})
 
-  const projectCoordinate = coord => {
+  const projectCoordinate = (coord) => {
     if (coord === null || !sample || !sample.frame_width) {
       return null
     }
@@ -47,19 +47,19 @@ function GeomLayer(props) {
   const [requestGeoms, requestCoordinates] = useGeomRenderingSocket(
     useMemo(
       () => ({
-        onGeoms: _data => {
+        onGeoms: (_data) => {
           if (_data) {
             console.log("Geom object received in client")
             setSample(_data.sample)
             setGeoms(_data.geoms)
           }
         },
-        onCoordinates: _data => {
+        onCoordinates: (_data) => {
           if (_data) {
             console.log("Coordinates object received in client")
             setCoordinates(_data)
           }
-        }
+        },
       }),
       []
     )
@@ -131,7 +131,7 @@ function GeomLayer(props) {
       <Layer>
         {geoms &&
           geoms
-            .map(geom => {
+            .map((geom) => {
               const [x, y, points] = (() => {
                 if (
                   frameEpochIndex === 0 ||
@@ -143,13 +143,13 @@ function GeomLayer(props) {
 
                 const geom_coordinates =
                   coordinates[geom.id][frameEpochIndex].coordinates
-                const projected_coordinates = geom_coordinates.map(point =>
+                const projected_coordinates = geom_coordinates.map((point) =>
                   projectCoordinate(point)
                 )
                 return [
                   projected_coordinates[0],
                   projected_coordinates[1],
-                  projected_coordinates
+                  projected_coordinates,
                 ]
               })()
 
@@ -206,7 +206,7 @@ function GeomLayer(props) {
                   return null
               }
             })
-            .filter(n => n)}
+            .filter((n) => n)}
       </Layer>
     </Stage>
   )

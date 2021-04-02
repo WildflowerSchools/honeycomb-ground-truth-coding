@@ -6,7 +6,7 @@ import { combineURLs } from "../../utils/helper"
 
 const VIDEO_STREAMER_BASE_URL = process.env.HONEYCOMB_VIDEO_STREAM_URI
 
-export const getURLWithPath = path => {
+export const getURLWithPath = (path) => {
   return combineURLs(VIDEO_STREAMER_BASE_URL, path)
 }
 
@@ -25,9 +25,9 @@ export const useVideoStreamer = (config, options = {}) => {
   const { getTokenSilently } = useAuth0()
 
   const client = axios.create({
-    baseURL: VIDEO_STREAMER_BASE_URL
+    baseURL: VIDEO_STREAMER_BASE_URL,
   })
-  client.interceptors.request.use(async function(config) {
+  client.interceptors.request.use(async function (config) {
     let token = await getTokenSilently()
 
     config.headers["Authorization"] = `Bearer ${token}`
@@ -35,17 +35,17 @@ export const useVideoStreamer = (config, options = {}) => {
   })
 
   const useAxios = makeUseAxios({
-    axios: client
+    axios: client,
   })
 
   const [{ data, loading, error }] = useAxios(config, options)
   const [proxiedResult, setProxiedResult] = useState({
     data: data,
     loading: loading,
-    error: error
+    error: error,
   })
 
-  const proxyError = function(e) {
+  const proxyError = function (e) {
     console.error("Request Failed:", e.config)
 
     if (error.response) {
@@ -71,4 +71,23 @@ export const useVideoStreamer = (config, options = {}) => {
   }, [loading, data, error])
 
   return proxiedResult
+}
+
+export const getVideoThumbnail = async (requestConfig, token) => {
+  const client = axios.create({
+    baseURL: VIDEO_STREAMER_BASE_URL,
+  })
+
+  requestConfig["responseType"] = "arraybuffer"
+  requestConfig["headers"] = { Authorization: `Bearer ${token}` }
+  const response = await client(requestConfig)
+  let image = btoa(
+    new Uint8Array(response.data).reduce(
+      (data, byte) => data + String.fromCharCode(byte),
+      ""
+    )
+  )
+  return `data:${response.headers[
+    "content-type"
+  ].toLowerCase()};base64,${image}`
 }

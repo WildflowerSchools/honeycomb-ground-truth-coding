@@ -26,7 +26,7 @@ function Index(props) {
       timezone: timezone,
       abbr: abbr,
       zoneName: zoneName,
-      details: `${abbr} | (${utc}) - ${zoneName}`
+      details: `${abbr} | (${utc}) - ${zoneName}`,
     }
   })
 
@@ -34,8 +34,8 @@ function Index(props) {
     setFilteredTimezones(
       !filter
         ? timezones
-        : timezones.filter(tz => {
-            return filter.split(" ").every(needle => {
+        : timezones.filter((tz) => {
+            return filter.split(" ").every((needle) => {
               return tz.search.toLowerCase().indexOf(needle) !== -1
             })
           })
@@ -48,7 +48,7 @@ function Index(props) {
       ref={ref}
       className="dropdown-toggle"
       // data-display="static"
-      onClick={e => {
+      onClick={(e) => {
         e.preventDefault()
         onClick(e)
       }}
@@ -65,7 +65,7 @@ function Index(props) {
         className,
         "aria-labelledby": labeledBy,
         setFilter,
-        filter
+        filter,
       },
       ref
     ) => {
@@ -80,7 +80,7 @@ function Index(props) {
             autoFocus
             className="mx-3 my-2 w-auto fill-available"
             placeholder="Type to filter..."
-            onChange={e => setFilter(e.target.value)}
+            onChange={(e) => setFilter(e.target.value)}
             value={filter}
           />
           <ul className="list-unstyled">{React.Children.toArray(children)}</ul>

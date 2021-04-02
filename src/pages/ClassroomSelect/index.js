@@ -3,7 +3,7 @@ import { Container, Col, Row, DropdownButton, Dropdown } from "react-bootstrap"
 import { useVideoStreamer } from "../../apis/VideoStreamer"
 import {
   LIST_CLASSROOMS,
-  LIST_CLASSROOM_VIDEOS
+  LIST_CLASSROOM_VIDEOS,
 } from "../../apis/VideoStreamer/queries"
 import ButtonDatePicker from "../../components/ButtonDatePicker"
 import { ROUTE_CLASSROOM_VIDEOS } from "../../routes"
@@ -19,13 +19,13 @@ function ClassroomDateSelect(props) {
   const {
     loading: listLoading,
     error: listError,
-    data: listData
+    data: listData,
   } = useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId))
 
   useEffect(() => {
     if (!listLoading && listData) {
       setAvailableDates(
-        listData.dates.map(data => {
+        listData.dates.map((data) => {
           return data.date
         })
       )
@@ -38,8 +38,8 @@ function ClassroomDateSelect(props) {
       {!listLoading && (
         <ButtonDatePicker
           placeholderText="Select Date..."
-          includeDates={availableDates.map(d => moment(d).toDate())}
-          onChange={d => onChange(moment(d).format("YYYY-MM-DD"))}
+          includeDates={availableDates.map((d) => moment(d).toDate())}
+          onChange={(d) => onChange(moment(d).format("YYYY-MM-DD"))}
           dateFormat="MMM dd, yyyy"
         />
       )}
@@ -50,7 +50,7 @@ function ClassroomDateSelect(props) {
 function Index(props) {
   const {
     match: { params },
-    history
+    history,
   } = props
 
   const [classroom, setClassroom] = useState(params.classroom)
@@ -59,7 +59,7 @@ function Index(props) {
   const {
     loading: classroomsLoading,
     error: classroomsError,
-    data: classroomsData
+    data: classroomsData,
   } = useVideoStreamer(LIST_CLASSROOMS)
 
   useEffect(() => {
@@ -80,7 +80,7 @@ function Index(props) {
               size="lg"
               aria-label="Classroom Select"
             >
-              {classroomsData.classrooms.map(classroom => (
+              {classroomsData.classrooms.map((classroom) => (
                 <Dropdown.Item
                   key={classroom.id}
                   onSelect={() => setClassroom(classroom)}
@@ -95,7 +95,7 @@ function Index(props) {
               className="mt-3 mx-auto classroom-input"
               classroomId={classroom.id}
               size="lg"
-              onChange={date => setVideoDate(date)}
+              onChange={(date) => setVideoDate(date)}
             />
           )}
         </Col>
