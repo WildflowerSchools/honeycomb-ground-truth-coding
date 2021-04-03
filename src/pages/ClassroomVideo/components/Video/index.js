@@ -136,7 +136,7 @@ function VideoPlayer(props) {
 
   const videoSwitchHotkeys = "abcdefghijklmnopqrstuvwxyz"
     .split("")
-    .map((v) => `⇧+${v}`)
+    .map((v) => `shift+${v}`)
   useHotkeys(
     videoSwitchHotkeys.join(","),
     (event, handler) => {

@@ -43,6 +43,7 @@ const VideoSelect = React.memo((props) => {
       left: "50%",
       margin: "auto",
       transform: "translate(-50%, -50%)",
+      pointerEvents: 'none',
     },
   }
 
