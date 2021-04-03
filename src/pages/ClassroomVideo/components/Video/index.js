@@ -163,9 +163,10 @@ function VideoPlayer(props) {
   useHotkeys(
     "t",
     (event) => {
+      event.preventDefault()
+
       if (editTimeZone) {
         if (inputTimeRef.current) {
-          event.preventDefault()
           inputTimeRef.current.focus()
         }
       } else {
