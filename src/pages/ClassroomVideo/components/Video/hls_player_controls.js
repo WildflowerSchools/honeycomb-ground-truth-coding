@@ -1,8 +1,8 @@
 import React from "react"
+import { useHotkeys } from "react-hotkeys-hook"
+
 import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap"
-
 import { FaPause, FaPlay, FaStepBackward, FaStepForward } from "react-icons/fa"
-
 import { MdForward30, MdReplay10 } from "react-icons/md"
 
 function HLSPlayerButton(props) {
@@ -27,12 +27,12 @@ function HLSPlayerButton(props) {
 function HLSPlayerControls(props) {
   const { hlsPlayerRef, ...other } = props
 
-  const handleOnRewind = (seconds) => {
+  const handleOnRewind = (seconds = 10) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime - seconds, "seconds")
   }
 
-  const handleOnFastForward = (seconds) => {
+  const handleOnFastForward = (seconds = 30) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime + seconds, "seconds")
   }
@@ -54,6 +54,34 @@ function HLSPlayerControls(props) {
   const handleOnPause = () => {
     hlsPlayerRef.current.setPlaying(false)
   }
+
+  useHotkeys(
+    "space,left,right,f,b",
+    (event, handler) => {
+      switch (handler.key) {
+        case "space":
+          if (hlsPlayerRef.current.playing) {
+            handleOnPause()
+          } else {
+            handleOnPlay()
+          }
+          break
+        case "left":
+          handleOnStepBackward()
+          break
+        case "right":
+          handleOnStepForward()
+          break
+        case "f":
+          handleOnFastForward()
+          break
+        case "b":
+          handleOnRewind()
+          break
+      }
+    },
+    []
+  )
 
   return (
     <ButtonGroup aria-label="Toolbar with video navigation buttons" {...other}>

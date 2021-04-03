@@ -13,7 +13,7 @@ const dateAsEpoch = (date, timezone, format) => {
   return moment(date, format).tz(timezone).valueOf()
 }
 
-function TimezoneEditable(props) {
+const TimezoneEditable = React.forwardRef((props, ref) => {
   const {
     format,
     epoch,
@@ -23,7 +23,14 @@ function TimezoneEditable(props) {
   } = props
 
   const defaultTime = epochAsString(epoch, timezone, format)
-  const inputRef = useRef(null)
+
+  let inputRef = null
+  if (ref === null) {
+    inputRef = useRef()
+  } else {
+    inputRef = ref
+  }
+  // const inputRef = useRef(null)
 
   const handleOnSubmit = (event) => {
     event.preventDefault()
@@ -81,7 +88,7 @@ function TimezoneEditable(props) {
       />
     </Form>
   )
-}
+})
 
 function TimezoneText(props) {
   const { timezone } = useSettings()

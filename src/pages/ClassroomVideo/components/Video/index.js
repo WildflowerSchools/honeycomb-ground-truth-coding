@@ -7,6 +7,7 @@ import {
   Row,
   Tooltip,
 } from "react-bootstrap"
+import { useHotkeys } from "react-hotkeys-hook"
 import { useLocation } from "react-router-dom"
 import { useQuery } from "@apollo/react-hooks"
 import { FaLink, FaDownload } from "react-icons/fa"
@@ -20,13 +21,11 @@ import {
 } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
 import HLSPlayerControls from "./hls_player_controls"
-import VideoSelect from "./video_select"
 import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
 
 import {
   GET_CLASSROOM_VIDEO_FEED,
   LIST_CLASSROOM_VIDEOS,
-  GET_CLASSROOM_VIDEO_PREVIEW_IMAGE,
 } from "../../../../apis/VideoStreamer/queries"
 import {
   TimezoneText,
@@ -55,9 +54,7 @@ function VideoPlayer(props) {
 
   const [videoDate, setVideoDate] = useState(props.videoDate)
   const [availableDates, setAvailableDates] = useState([])
-  // const [activeVideo, setActiveVideo] = useState()
   const [activeVideoDeviceId, setActiveVideoDeviceId] = useState()
-  // const [videos, setVideos] = useState([])
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
   const [playbackTime, setPlaybackTime] = useState(null)
@@ -85,6 +82,8 @@ function VideoPlayer(props) {
   const { loading, getTokenSilently } = useAuth0()
 
   const hlsPlayerRef = useRef()
+  const selectDateTimeRef = useRef()
+  const inputTimeRef = useRef()
 
   useEffect(async () => {
     if (feedLoading === false && feedData) {
@@ -135,6 +134,47 @@ function VideoPlayer(props) {
     }
   }, [feedLoading, feedData])
 
+  const videoSwitchHotkeys = "abcdefghijklmnopqrstuvwxyz"
+    .split("")
+    .map((v) => `⇧+${v}`)
+  useHotkeys(
+    videoSwitchHotkeys.join(","),
+    (event, handler) => {
+      if (feedLoading === false && feedData) {
+        const videoIdx = videoSwitchHotkeys.indexOf(handler.key)
+        if (feedData["videos"].length >= videoIdx) {
+          setActiveVideo(feedData["videos"][videoIdx])
+        }
+      }
+    },
+    [feedLoading, feedData]
+  )
+
+  useHotkeys(
+    "d",
+    () => {
+      if (selectDateTimeRef.current) {
+        selectDateTimeRef.current.setOpen(true)
+      }
+    },
+    [selectDateTimeRef]
+  )
+
+  useHotkeys(
+    "t",
+    (event) => {
+      if (editTimeZone) {
+        if (inputTimeRef.current) {
+          event.preventDefault()
+          inputTimeRef.current.focus()
+        }
+      } else {
+        handleEditTimeZone()
+      }
+    },
+    [editTimeZone, inputTimeRef]
+  )
+
   useEffect(() => {
     if (!listLoading && listData) {
       setAvailableDates(
@@ -166,10 +206,6 @@ function VideoPlayer(props) {
       setPlaybackProgress(progress.playedSeconds)
     }
   }
-
-  // const onVideoSelected = (video) => {
-  //   setActiveVideo(video)
-  // }
 
   const copyPageLink = () => {
     const query = queryString.parse(location.search)
@@ -274,6 +310,7 @@ function VideoPlayer(props) {
                 />
               ) : (
                 <TimezoneEditable
+                  ref={inputTimeRef}
                   onSubmit={seekTo}
                   onBlur={() => {
                     setEditTimezone(false)
@@ -311,6 +348,7 @@ function VideoPlayer(props) {
         <Col sm={2}>
           <div className="float-right">
             <ButtonDatePicker
+              ref={selectDateTimeRef}
               placeholderText="Select Date..."
               selected={moment(videoDate).toDate()}
               onChange={(d) => setVideoDate(moment(d).format("YYYY-MM-DD"))}

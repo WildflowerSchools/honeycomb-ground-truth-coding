@@ -3,10 +3,10 @@ import { Container, Col, Row } from "react-bootstrap"
 import queryString from "query-string"
 
 import { InteractionList, InteractionForm } from "./components/Interaction"
-import VideoPlayer from "./components/Video"
 import { ROUTE_CLASSROOM_SELECT } from "../../routes"
-import VideoSelect from "./components/Video/video_select"
 import { useAuth0 } from "../../react-auth0-spa"
+import VideoPlayer from "./components/Video"
+import VideoSelect from "./components/Video/video_select"
 
 function Index(props) {
   const {
@@ -31,10 +31,6 @@ function Index(props) {
   const [videoTime, setVideoTime] = useState(query.time || null)
   const [deviceName, setDeviceName] = useState(query.device || null)
 
-  const onVideoSelected = (video) => {
-    setActiveVideo(video)
-  }
-
   return (
     <Container>
       <Row>
@@ -57,7 +53,8 @@ function Index(props) {
           {!loading && activeVideo && (
             <VideoSelect
               videos={videos}
-              onVideoSelected={onVideoSelected}
+              activeVideo={activeVideo}
+              setActiveVideo={setActiveVideo}
               activeVideoUrl={activeVideo.url}
             />
           )}

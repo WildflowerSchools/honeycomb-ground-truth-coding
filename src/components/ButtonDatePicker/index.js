@@ -14,10 +14,10 @@ class ButtonWrapper extends React.Component {
   }
 }
 
-function Index(props) {
+const Index = React.forwardRef((props, ref) => {
   const { ...other } = props
 
-  return <DatePicker {...other} customInput={<ButtonWrapper />} />
-}
+  return <DatePicker ref={ref} {...other} customInput={<ButtonWrapper />} />
+})
 
 export default Index

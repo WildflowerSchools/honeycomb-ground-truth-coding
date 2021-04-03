@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap"
 import HLSPlayer from "./hls_player"
-import { useVideoStreamer } from "../../../../apis/VideoStreamer"
-import { GET_CLASSROOM_VIDEO_FEED } from "../../../../apis/VideoStreamer/queries"
 
 const VideoSelect = React.memo((props) => {
-  const { videos = [], onVideoSelected = () => {} } = props
+  const { videos = [], activeVideo, setActiveVideo } = props
 
   const [videosHidden, setVideosHidden] = useState(
     videos.reduce((acc, video) => {
@@ -13,11 +11,9 @@ const VideoSelect = React.memo((props) => {
       return acc
     }, {})
   )
-  const [activeVideoUrl, setActiveVideoUrl] = useState(null)
 
   const handleVideoSelected = (video) => {
-    setActiveVideoUrl(video.url)
-    onVideoSelected(video)
+    setActiveVideo(video)
   }
 
   useEffect(() => {
@@ -28,8 +24,8 @@ const VideoSelect = React.memo((props) => {
       }, {})
     )
 
-    if (!activeVideoUrl && videos && videos.length) {
-      setActiveVideoUrl(videos[0].url)
+    if (!activeVideo && videos && videos.length) {
+      setActiveVideo(videos[0])
     }
   }, [videos])
 
@@ -40,6 +36,14 @@ const VideoSelect = React.memo((props) => {
   const styles = {
     rowMainMT: { marginTop: "20px" },
     thumbnailsPT: { paddingTop: "0px" },
+    thumbnailsShortcut: {
+      position: "absolute",
+      color: "yellow",
+      top: "50%",
+      left: "50%",
+      margin: "auto",
+      transform: "translate(-50%, -50%)",
+    },
   }
 
   return (
@@ -72,7 +76,9 @@ const VideoSelect = React.memo((props) => {
             >
               <HLSPlayer
                 className={[
-                  activeVideoUrl === video.url ? "active" : "inactive",
+                  activeVideo && activeVideo.url === video.url
+                    ? "active"
+                    : "inactive",
                   videosHidden[video.url] ? "d-none" : "",
                 ].join(" ")}
                 streamPath={video.url}
@@ -84,6 +90,9 @@ const VideoSelect = React.memo((props) => {
                   setVideoHidden(video, hidden)
                 }}
               />
+              <p style={styles.thumbnailsShortcut}>
+                {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")[ii]}
+              </p>
             </Col>
           </OverlayTrigger>
         )
