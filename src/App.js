@@ -1,21 +1,24 @@
 import React, { useRef, useEffect } from "react"
-import { Switch } from "react-router-dom"
-import PrivateRoute from "./components/PrivateRoute"
 import { useAuth0 } from "./react-auth0-spa"
+import { Container } from "react-bootstrap"
+import { Route, Switch, useHistory } from "react-router-dom"
 
 import NavBar from "./components/NavBar"
 import ClassroomSelect from "./pages/ClassroomSelect"
 import ClassroomVideo from "./pages/ClassroomVideo"
-import { Container, Row } from "react-bootstrap"
+import Login from "./pages/Login"
 
-function Index(props) {
+import PrivateRoute from "./components/PrivateRoute"
+
+function Index() {
   const { isAuthenticated, loginWithRedirect, loading } = useAuth0()
+  const history = useHistory()
   const ref = useRef()
 
   useEffect(() => {
     const fn = async () => {
       if (loading === false && !isAuthenticated) {
-        await loginWithRedirect({})
+        history.push("/login")
       }
     }
     fn()
@@ -25,9 +28,10 @@ function Index(props) {
     <div ref={ref} className="wfs-app">
       {!isAuthenticated && (
         <Container style={{ marginTop: "100px" }}>
-          <Row className="justify-content-md-center">
-            <div>Loading...</div>
-          </Row>
+          <Switch>
+            <Route path="/login" component={Login} />
+            <Route path="*" component={ClassroomSelect} />
+          </Switch>
         </Container>
       )}
       {isAuthenticated && (
