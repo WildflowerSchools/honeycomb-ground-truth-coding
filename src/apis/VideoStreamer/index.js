@@ -60,6 +60,8 @@ export const useVideoStreamer = (config, options = {}) => {
   }
 
   useEffect(() => {
+    let isCancelled = false
+
     let { error: proxiedError } = { loading, data, error }
     if (!loading) {
       if (error) {
@@ -67,7 +69,13 @@ export const useVideoStreamer = (config, options = {}) => {
       }
     }
 
-    setProxiedResult({ loading: loading, data: data, error: proxiedError })
+    if (!isCancelled) {
+      setProxiedResult({loading: loading, data: data, error: proxiedError})
+    }
+
+    return () => {
+      isCancelled = true
+    }
   }, [loading, data, error])
 
   return proxiedResult

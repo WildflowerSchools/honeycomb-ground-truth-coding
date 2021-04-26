@@ -23,12 +23,20 @@ function ClassroomDateSelect(props) {
   } = useVideoStreamer(LIST_CLASSROOM_VIDEOS(classroomId))
 
   useEffect(() => {
-    if (!listLoading && listData) {
-      setAvailableDates(
-        listData.dates.map((data) => {
-          return data.date
-        })
-      )
+    let isCancelled = false
+
+    if (!isCancelled) {
+      if (!listLoading && listData) {
+        setAvailableDates(
+          listData.dates.map((data) => {
+            return data.date
+          })
+        )
+      }
+    }
+
+    return () => {
+      isCancelled = true
     }
   }, [listLoading, listData])
 
@@ -63,8 +71,16 @@ function Index(props) {
   } = useVideoStreamer(LIST_CLASSROOMS)
 
   useEffect(() => {
-    if (classroom && videoDate) {
-      history.push(ROUTE_CLASSROOM_VIDEOS(classroom.id, videoDate))
+    let isCancelled = false
+
+    if (!isCancelled) {
+      if (classroom && videoDate) {
+        history.push(ROUTE_CLASSROOM_VIDEOS(classroom.id, videoDate))
+      }
+    }
+
+    return () => {
+      isCancelled = true
     }
   }, [classroom, videoDate])
 

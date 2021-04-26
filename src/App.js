@@ -16,17 +16,29 @@ function Index() {
   const ref = useRef()
 
   useEffect(() => {
+    let isCancelled = false
+
     const fn = async () => {
-      if (loading === false && !isAuthenticated) {
+      if (!isCancelled && loading === false && !isAuthenticated) {
+        console.log("Redirecting to login")
         history.push("/login")
       }
     }
     fn()
+
+    return () => {
+      isCancelled = true
+    }
   }, [isAuthenticated, loginWithRedirect, loading])
 
   return (
     <div ref={ref} className="wfs-app">
-      {!isAuthenticated && (
+      {loading && (
+        <Container style={{ marginTop: "100px" }}>
+          <div>Loading...</div>
+        </Container>
+      )}
+      {!loading && !isAuthenticated && (
         <Container style={{ marginTop: "100px" }}>
           <Switch>
             <Route path="/login" component={Login} />
@@ -34,7 +46,7 @@ function Index() {
           </Switch>
         </Container>
       )}
-      {isAuthenticated && (
+      {!loading && isAuthenticated && (
         <div>
           <NavBar />
           <Container style={{ marginTop: "100px" }}>

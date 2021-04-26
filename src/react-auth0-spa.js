@@ -24,12 +24,14 @@ export const Auth0Provider = ({
   const [, setCookie, removeCookie] = useCookies([JWT_COOKIE_NAME])
 
   useEffect(() => {
+    let isCancelled = false;
+
     const initAuth0 = async () => {
       const auth0 = await createAuth0Client(initOptions)
-      setAuth0(auth0)
+      if (!isCancelled) {
+        setAuth0(auth0)
+      }
 
-      // const { appState } = await auth0.handleRedirectCallback()
-      // console.log(appState)
       if (
         (window.location.search.includes("code=") &&
           window.location.search.includes("state=")) ||
@@ -37,47 +39,66 @@ export const Auth0Provider = ({
       ) {
         try {
           const { appState } = await auth0.handleRedirectCallback()
-          console.log("Okay?")
-          onRedirectCallback(appState)
-          setError(null)
+          if (!isCancelled) {
+            onRedirectCallback(appState)
+            setError(null)
+          }
         } catch (e) {
           console.warn(`${e.error}: ${e.error_description}`)
-          setError(e)
+          if (!isCancelled) {
+            setError(e)
+          }
         }
       }
 
       const isAuthenticated = await auth0.isAuthenticated()
-      setIsAuthenticated(isAuthenticated)
-      if (isAuthenticated) {
-        const user = await auth0.getUser()
-        setUser(user)
-      }
+      if (!isCancelled) {
+        console.log(`isAuthenticated: ${isAuthenticated}`)
+        setIsAuthenticated(isAuthenticated)
+        if (isAuthenticated) {
+          const user = await auth0.getUser()
+          setUser(user)
+        }
 
-      setLoading(false)
+        setLoading(false)
+      }
     }
 
     initAuth0()
-    // eslint-disable-next-line
+
+    return () => {
+      isCancelled = true
+    }
   }, [])
 
   useEffect(() => {
+    let isCancelled = false
+
     const updateJWTCookie = async () => {
       if (isAuthenticated) {
         const token = await auth0Client.getTokenSilently()
-        const domain = `${window.location.hostname
-          .split(".")
-          .slice(-2)
-          .join(".")}`
-        setCookie(JWT_COOKIE_NAME, token, {
-          secure: true,
-          domain: domain,
-          path: "/",
-        })
+        if (!isCancelled) {
+          const domain = `${window.location.hostname
+            .split(".")
+            .slice(-2)
+            .join(".")}`
+          setCookie(JWT_COOKIE_NAME, token, {
+            secure: true,
+            domain: domain,
+            path: "/",
+          })
+        }
       } else {
-        removeCookie(JWT_COOKIE_NAME)
+        if (!isCancelled) {
+          removeCookie(JWT_COOKIE_NAME)
+        }
       }
     }
     updateJWTCookie()
+
+    return () => {
+      isCancelled = true
+    }
   }, [isAuthenticated])
 
   const loginWithPopup = async (params = {}) => {
@@ -95,7 +116,6 @@ export const Auth0Provider = ({
   }
 
   const handleRedirectCallback = async () => {
-    console.log("handleRedirectCallback")
     setLoading(true)
     await auth0Client.handleRedirectCallback()
     const user = await auth0Client.getUser()

@@ -12,7 +12,9 @@ function Index() {
   }
 
   useEffect(() => {
-    console.log(error)
+    if (error) {
+      console.log(error)
+    }
   }, [error])
 
   return (
