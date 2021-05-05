@@ -108,8 +108,9 @@ const HLSPlayer = forwardRef((props, ref) => {
             }
           })
         },
-        startPosition: startPlaybackAt,
+        startPosition: startPlaybackAt
       },
+      hlsVersion: "1.0.2"
     },
   }
 
