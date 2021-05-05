@@ -8,7 +8,7 @@ import {
   Tooltip,
 } from "react-bootstrap"
 import { useHotkeys } from "react-hotkeys-hook"
-import { useLocation } from "react-router-dom"
+import { useLocation, useHistory, useParams } from "react-router-dom"
 import { useQuery } from "@apollo/react-hooks"
 import { FaLink, FaDownload } from "react-icons/fa"
 import queryString from "query-string"
@@ -21,7 +21,9 @@ import {
 } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
 import HLSPlayerControls from "./hls_player_controls"
-import { GET_ENVIRONMENT_ASSIGNMENTS } from "../../../../apis/Honeycomb/queries"
+import {
+  GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME,
+} from "../../../../apis/Honeycomb/queries"
 
 import {
   GET_CLASSROOM_VIDEO_FEED,
@@ -35,10 +37,13 @@ import moment from "../../../../utils/moment"
 
 import "./style.css"
 import { useSettings } from "../../../../settings"
+import { ROUTE_CLASSROOM_VIDEOS } from "../../../../routes"
 
 function VideoPlayer(props) {
+  const history = useHistory()
+  let { classroomId: paramClassroomId, videoDate: paramVideoDate } = useParams()
+
   const {
-    classroomId,
     deviceName,
     videoTime,
     setVideos,
@@ -52,7 +57,8 @@ function VideoPlayer(props) {
 
   const { timezone } = useSettings()
 
-  const [videoDate, setVideoDate] = useState(props.videoDate)
+  const [classroomId, setClassroomId] = useState(paramClassroomId)
+  const [videoDate, setVideoDate] = useState(paramVideoDate)
   const [availableDates, setAvailableDates] = useState([])
   const [activeVideoDeviceId, setActiveVideoDeviceId] = useState()
   const [startTime, setStartTime] = useState()
@@ -60,6 +66,7 @@ function VideoPlayer(props) {
   const [playbackTime, setPlaybackTime] = useState(null)
   const [playbackProgress, setPlaybackProgress] = useState(0)
   const [editTimeZone, setEditTimezone] = useState(false)
+  const [hotkeyEditTimeTriggered, setHotkeyEditTimeTriggered] = useState(false)
 
   const {
     loading: listLoading,
@@ -75,8 +82,12 @@ function VideoPlayer(props) {
     loading: assignmentsLoading,
     data: assignmentsData,
     error: assignmentsError,
-  } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS, {
-    variables: { environment_id: classroomId },
+  } = useQuery(GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME, {
+    variables: {
+      environment_id: classroomId,
+      latest_start_time: moment.utc(endTime).format("YYYY-MM-DDThh:mm:ss"),
+      earliest_end_time: moment.utc(startTime).format("YYYY-MM-DDThh:mm:ss"),
+    },
   })
 
   const { loading, getTokenSilently } = useAuth0()
@@ -84,6 +95,14 @@ function VideoPlayer(props) {
   const hlsPlayerRef = useRef()
   const selectDateTimeRef = useRef()
   const inputTimeRef = useRef()
+
+  useEffect(() => {
+    setVideoDate(paramVideoDate)
+  }, [paramVideoDate])
+
+  useEffect(() => {
+    setClassroomId(paramClassroomId)
+  }, [paramClassroomId])
 
   useEffect(async () => {
     if (feedLoading === false && feedData) {
@@ -134,6 +153,32 @@ function VideoPlayer(props) {
     }
   }, [feedLoading, feedData])
 
+  useEffect(() => {
+    if (!editTimeZone || !hotkeyEditTimeTriggered || !inputTimeRef.current) {
+      return
+    }
+
+    console.log("Set input")
+    navigator.clipboard.writeText(inputTimeRef.current.value)
+    inputTimeRef.current.select()
+
+    setHotkeyEditTimeTriggered(false)
+  }, [editTimeZone, hotkeyEditTimeTriggered, inputTimeRef])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    if (!isCancelled) {
+      if (classroomId && videoDate) {
+        history.push(ROUTE_CLASSROOM_VIDEOS(classroomId, videoDate))
+      }
+    }
+
+    return () => {
+      isCancelled = true
+    }
+  }, [classroomId, videoDate])
+
   const videoSwitchHotkeys = "abcdefghijklmnopqrstuvwxyz"
     .split("")
     .map((v) => `shift+${v}`)
@@ -165,13 +210,9 @@ function VideoPlayer(props) {
     (event) => {
       event.preventDefault()
 
-      if (editTimeZone) {
-        if (inputTimeRef.current) {
-          inputTimeRef.current.focus()
-        }
-      } else {
-        handleEditTimeZone()
-      }
+      pause()
+      handleEditTimeZone()
+      setHotkeyEditTimeTriggered(true)
     },
     [editTimeZone, inputTimeRef]
   )
@@ -188,7 +229,7 @@ function VideoPlayer(props) {
 
   useEffect(() => {
     if (!assignmentsLoading && assignmentsData && activeVideo) {
-      const assignment = assignmentsData["getEnvironment"]["assignments"].find(
+      const assignment = assignmentsData["searchAssignments"]["data"].find(
         (a) => a["assignment_id"] === activeVideo.device_id
       )
       setActiveVideoDeviceId(assignment["assigned"]["device_id"])
@@ -260,6 +301,12 @@ function VideoPlayer(props) {
     if (hlsPlayerRef.current) {
       const pbt_diff = pbt.diff(moment.utc(feedData["start"])) / 1000
       hlsPlayerRef.current.getHlsRef().seekTo(pbt_diff, "seconds")
+    }
+  }
+
+  const pause = () => {
+    if (hlsPlayerRef.current) {
+      hlsPlayerRef.current.setPlaying(false)
     }
   }
 

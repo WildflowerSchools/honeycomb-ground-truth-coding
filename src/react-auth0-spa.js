@@ -24,7 +24,7 @@ export const Auth0Provider = ({
   const [, setCookie, removeCookie] = useCookies([JWT_COOKIE_NAME])
 
   useEffect(() => {
-    let isCancelled = false;
+    let isCancelled = false
 
     const initAuth0 = async () => {
       const auth0 = await createAuth0Client(initOptions)

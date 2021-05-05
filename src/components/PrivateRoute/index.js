@@ -7,13 +7,13 @@ const PrivateRoute = ({ component: Component, path, ...rest }) => {
   const { isAuthenticated, loginWithRedirect } = useAuth0()
 
   useEffect(() => {
-    let isCancelled = false;
+    let isCancelled = false
 
     const fn = async () => {
       if (!isCancelled) {
         if (!isAuthenticated) {
           await loginWithRedirect({
-            appState: {targetUrl: path},
+            appState: { targetUrl: path },
           })
         }
       }
@@ -21,7 +21,7 @@ const PrivateRoute = ({ component: Component, path, ...rest }) => {
     fn()
 
     return () => {
-      isCancelled = true;
+      isCancelled = true
     }
   }, [isAuthenticated, loginWithRedirect, path])
 

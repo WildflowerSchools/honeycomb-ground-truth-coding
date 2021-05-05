@@ -70,7 +70,7 @@ export const useVideoStreamer = (config, options = {}) => {
     }
 
     if (!isCancelled) {
-      setProxiedResult({loading: loading, data: data, error: proxiedError})
+      setProxiedResult({ loading: loading, data: data, error: proxiedError })
     }
 
     return () => {

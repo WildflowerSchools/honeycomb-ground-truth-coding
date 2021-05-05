@@ -27,12 +27,12 @@ function HLSPlayerButton(props) {
 function HLSPlayerControls(props) {
   const { hlsPlayerRef, ...other } = props
 
-  const handleOnRewind = (seconds = 10) => {
+  const handleOnRewind = (seconds = 6) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime - seconds, "seconds")
   }
 
-  const handleOnFastForward = (seconds = 30) => {
+  const handleOnFastForward = (seconds = 5) => {
     const currentTime = hlsPlayerRef.current.getHlsRef().getCurrentTime()
     hlsPlayerRef.current.getHlsRef().seekTo(currentTime + seconds, "seconds")
   }
@@ -90,10 +90,10 @@ function HLSPlayerControls(props) {
         hlsPlayerRef.current.getHlsRef() && (
           <>
             <HLSPlayerButton
-              disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() < 10}
-              tooltip="Rewind 10 seconds"
+              disabled={hlsPlayerRef.current.getHlsRef().getCurrentTime() < 6}
+              tooltip="Rewind 6 seconds"
               onClick={() => {
-                handleOnRewind(10)
+                handleOnRewind(6)
               }}
               variant="light"
             >
@@ -134,9 +134,9 @@ function HLSPlayerControls(props) {
               <FaStepForward />
             </HLSPlayerButton>
             <HLSPlayerButton
-              tooltip="Fast-forward 30 seconds"
+              tooltip="Fast-forward 5 seconds"
               onClick={() => {
-                handleOnFastForward(30)
+                handleOnFastForward(5)
               }}
               variant="light"
             >

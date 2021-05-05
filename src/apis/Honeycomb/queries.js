@@ -12,13 +12,39 @@ export const GET_ENVIRONMENTS = gql`
   }
 `
 
-export const GET_ENVIRONMENT_ASSIGNMENTS = gql`
-  query getEnvironment($environment_id: ID!) {
-    getEnvironment(environment_id: $environment_id) {
-      environment_id
-      name
-      assignments(current: true) {
+
+export const GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME = gql`
+  query searchAssignments(
+    $environment_id: String
+    $latest_start_time: String
+    $earliest_end_time: String
+  ) {
+    searchAssignments(
+      query: {
+        operator: AND
+        children: [
+          { field: "environment", operator: EQ, value: $environment_id }
+          { field: "assigned_type", operator: EQ, value: "DEVICE" }
+          { field: "start", operator: LT, value: $latest_start_time }
+          {
+            operator: OR
+            field: "end"
+            children: [
+              { field: "end", operator: GT, value: $earliest_end_time }
+              { field: "end", operator: ISNULL }
+            ]
+          }
+        ]
+      }
+    ) {
+      data {
+        environment {
+          name
+        }
+        start
+        end
         assignment_id
+        assigned_type
         assigned {
           ... on Device {
             device_id

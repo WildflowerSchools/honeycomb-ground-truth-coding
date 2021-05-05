@@ -1,5 +1,5 @@
 # build environment
-FROM node:12.22.1-alpine as build
+FROM node:16.0.0-alpine as build
 WORKDIR /app
 ENV PATH=/app/node_modules/.bin:$PATH \
     HONEYCOMB_URI=ENV_VAR_HONEYCOMB_URI \
