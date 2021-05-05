@@ -12,7 +12,6 @@ export const GET_ENVIRONMENTS = gql`
   }
 `
 
-
 export const GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME = gql`
   query searchAssignments(
     $environment_id: String

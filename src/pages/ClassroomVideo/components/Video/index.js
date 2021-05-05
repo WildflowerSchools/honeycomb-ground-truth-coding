@@ -21,9 +21,7 @@ import {
 } from "../../../../apis/VideoStreamer"
 import HLSPlayer from "./hls_player"
 import HLSPlayerControls from "./hls_player_controls"
-import {
-  GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME,
-} from "../../../../apis/Honeycomb/queries"
+import { GET_ENVIRONMENT_ASSIGNMENTS_AT_TIME } from "../../../../apis/Honeycomb/queries"
 
 import {
   GET_CLASSROOM_VIDEO_FEED,

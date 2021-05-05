@@ -100,6 +100,7 @@ const HLSPlayer = forwardRef((props, ref) => {
       hlsOptions: {
         xhrSetup: function (xhr, url) {
           xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
+          xhr.setRequestHeader("Cache-Control", "no-cache")
           // Warning, onreadystatechange is not available to HLS' xhr object. Need to use the event listener instead.
           xhr.addEventListener("loadend", function () {
             if (xhr.status === 404) {
