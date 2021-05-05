@@ -98,6 +98,7 @@ const HLSPlayer = forwardRef((props, ref) => {
   const reactPlayerConfig = {
     file: {
       hlsOptions: {
+        debug: true,
         xhrSetup: function (xhr, url) {
           xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`)
           xhr.setRequestHeader("Cache-Control", "no-cache")
