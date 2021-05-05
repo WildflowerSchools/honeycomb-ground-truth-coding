@@ -28,8 +28,9 @@ export const useVideoStreamer = (config, options = {}) => {
     baseURL: VIDEO_STREAMER_BASE_URL,
   })
   client.interceptors.request.use(async function (config) {
-    let token = await getTokenSilently()
+    let token = await getTokenSilently({ ignoreCache: true })
 
+    config.headers["Cache-Control"] = "no-store, no-cache"
     config.headers["Authorization"] = `Bearer ${token}`
     return config
   })
